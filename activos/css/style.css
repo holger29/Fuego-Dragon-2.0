@@ -1,0 +1,92 @@
+/* Estilos Globales */
+:root {
+    --color-primary: #a30000; /* Rojo fuego */
+    --color-text-light: #f4f4f4;
+    --color-background-dark: #121212;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--color-text-light);
+    background-color: var(--color-background-dark);
+    /* Deshabilitar scroll si el contenido no lo requiere */
+    overflow: hidden;
+}
+
+/* 1. Contenedor de Partículas */
+#tsparticles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-background-dark);
+    /* Un ligero degradado radial para enfocar el centro, como el mockup */
+    background-image: radial-gradient(circle, rgba(20, 20, 20, 1) 0%, rgba(0, 0, 0, 1) 100%);
+    z-index: 1; /* Asegura que esté detrás del contenido */
+}
+
+/* 2. Estilos del Contenido Principal */
+.content-wrapper {
+    position: relative;
+    z-index: 10; /* Asegura que esté por encima de las partículas */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* 3. Header y Tipografía (simulando el diseño elegante) */
+header {
+    max-width: 100%;
+}
+
+header h1 {
+    font-size: 5em;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.2em;
+    /* Fuente: Si deseas la fuente serif elegante, necesitarías importarla (ej. 'Playfair Display' de Google Fonts) */
+}
+
+header p {
+    font-size: 1.2em;
+    font-weight: 300;
+    margin-bottom: 30px;
+}
+
+/* 4. Botón de Registro */
+.btn-registro {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-registro:hover {
+    background-color: #d10000; /* Rojo más oscuro al pasar el mouse */
+}
+
+/* 5. Footer (Admin Panel) */
+.admin-link {
+    position: absolute;
+    bottom: 20px;
+    font-size: 0.8em;
+}
+
+.admin-link a {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.admin-link a:hover {
+    color: var(--color-text-light);
+}
