@@ -13,7 +13,9 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
     <title>Panel de Administrador | Fuego Dragón</title>
     
     <link rel="icon" type="image/png" href="activos/img/favicon_fd.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="activos/css/style.css"> 
+    <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
     
     <style>
         /* Estilos generales */
@@ -110,6 +112,14 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
             padding-top: 25px; 
             padding-bottom: 25px;
         }
+
+        /* Estilos para el acordeón de temporada (anidado) */
+        .season-accordion-block.active .season-accordion-arrow {
+            transform: rotate(180deg);
+        }
+        .season-accordion-content {
+            display: none; /* Oculto por defecto, se muestra con JS */
+        }
         
         /* ESTRUCTURA ESPECÍFICA DE GESTIONAR CONTENIDO */
         .content-management-area {
@@ -127,27 +137,32 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
         
         /* Listado de Temporadas */
         .saga-list {
-            margin-top: 20px;
-        }
-        .season-section {
-            background-color: #2b394d;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
-        .season-header-title {
-            padding: 15px;
-            background-color: #3a4b63;
-            color: white;
-            font-weight: bold;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 20px;
         }
+        .series-block {
+            background-color: #1f2a38;
+            border: 1px solid #3a4b63;
+            border-radius: 6px;
+            padding: 20px;
+        }
+        .series-title {
+            font-size: 1.5em;
+            color: #a30000;
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3a4b63;
+        }
+        .season-accordion-block {
+            margin-bottom: 15px;
+        }
+
         .episode-list {
             padding: 0;
             list-style: none;
             margin: 0;
+            background-color: #2b394d;
         }
         .episode-item {
             display: grid;
@@ -155,6 +170,7 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
             align-items: center;
             padding: 10px 15px;
             border-bottom: 1px solid #333;
+            gap: 15px;
         }
         .episode-item:last-child {
             border-bottom: none;
@@ -176,11 +192,11 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
         .episode-actions {
             display: flex;
             gap: 10px;
-            justify-content: flex-end;
+            justify-content: center;
         }
         
         /* Botones de Acción (Subir, Borrar, Previsualizar) */
-        .btn-preview, .btn-upload, .btn-delete {
+        .action-btn {
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
@@ -188,29 +204,54 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
             font-size: 0.8em;
             height: 30px;
         }
-        .btn-preview {
+        .action-btn.preview {
             background-color: #007bff; /* Azul para el ojo */
             color: white;
-            font-weight: bold;
         }
-        .btn-upload {
+        .action-btn.upload {
             background-color: #5a7493; /* Gris/Azul para subir */
             color: white;
         }
-        .btn-delete {
+        .action-btn.delete {
             background-color: #dc3545; /* Rojo para borrar */
             color: white;
         }
-        .icon-small {
-            font-size: 1.1em;
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* --- ESTILOS RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 15px 20px;
+            }
+            .admin-header h1 {
+                font-size: 1.5em;
+            }
+            .admin-content {
+                margin: 20px auto;
+            }
+            .episode-item {
+                grid-template-columns: 1fr; /* Apila los elementos */
+                text-align: center;
+            }
+            .episode-name {
+                margin-bottom: 10px;
+            }
+            .episode-status {
+                margin-bottom: 10px;
+            }
+            .episode-actions {
+                justify-content: center;
+            }
         }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Script para manejar los acordeones principales (Gestionar, Usuarios, Comentarios)
-            const mainHeaders = document.querySelectorAll('.admin-accordion-block .accordion-header');
+            // Script para manejar TODOS los acordeones
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
             
-            mainHeaders.forEach(header => {
+            accordionHeaders.forEach(header => {
                 header.addEventListener('click', function() {
                     const block = this.closest('.admin-accordion-block');
                     block.classList.toggle('active');
@@ -240,30 +281,29 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
                     
                     <div class="saga-list">
                         
-                        <div class="season-section">
-                            <div class="season-header-title">GAME OF THRONES</div>
+                        <div class="series-block">
+                            <h3 class="series-title">GAME OF THRONES</h3>
                             
                             <?php 
                                 // Función auxiliar para generar las listas de episodios (solo frontend)
                                 function generate_episodes($season, $count, $available_until = 0) {
                                     $html = '';
                                     for ($i = 1; $i <= $count; $i++) {
-                                        $status = ($i <= $available_until) ? 'disponible' : 'pendiente';
+                                        $is_available = ($i <= $available_until);
+                                        $status_class = $is_available ? 'disponible' : 'pendiente';
+                                        $status_text = $is_available ? 'Disponible' : 'Pendiente';
+
                                         $html .= '<div class="episode-item">';
                                         $html .= '<span class="episode-name">Episodio ' . $i . ': Capítulo ' . $i . ' (.mp4)</span>';
-                                        $html .= '<span class="episode-status status-' . $status . '">' . (($i <= $available_until) ? 'Disponible' : 'Pendiente') . '</span>';
-                                        
-                                        // Ojo de previsualización (Solo si está disponible)
-                                        $html .= '<span class="episode-actions">';
-                                        if ($status == 'disponible') {
-                                            $html .= '<button class="btn-preview"><span class="icon-small">@</span></button>'; // Icono de Ojo/Preview
-                                        }
-                                        $html .= '</span>';
+                                        $html .= '<span class="episode-status status-' . $status_class . '">' . $status_text . '</span>';
                                         
                                         // Botones de Acción
                                         $html .= '<span class="episode-actions">';
-                                        $html .= '<button class="btn-upload">Subir</button>';
-                                        $html .= '<button class="btn-delete"><span class="icon-small">🗑️</span></button>';
+                                        if ($is_available) {
+                                            $html .= '<button class="action-btn preview" title="Previsualizar"><i class="fa-solid fa-eye"></i></button>';
+                                        }
+                                        $html .= '<button class="action-btn upload" title="Subir/Reemplazar"><i class="fa-solid fa-upload"></i></button>';
+                                        $html .= '<button class="action-btn delete" title="Borrar"><i class="fa-solid fa-trash"></i></button>';
                                         $html .= '</span>';
                                         $html .= '</div>';
                                     }
@@ -287,9 +327,13 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
                                     // Simulamos que T1 está disponible y las demás no
                                     $available_count = ($season == 1) ? $episodes_count : 0; 
 
-                                    echo '<div class="season-section" style="margin-bottom: 5px;">';
-                                    echo '<div class="season-header-title" style="background-color: #333; padding: 10px 15px;">Temporada ' . $season . '</div>';
-                                    echo '<div class="episode-list">';
+                                    // Usamos la misma estructura de acordeón principal para las temporadas
+                                    echo '<div class="admin-accordion-block">'; // Bloque de acordeón para la temporada
+                                    echo '<div class="accordion-header">';
+                                    echo '<h2>Temporada ' . $season . '</h2>';
+                                    echo '<span class="accordion-arrow">V</span>';
+                                    echo '</div>';
+                                    echo '<div class="accordion-content episode-list">'; // El contenido es la lista de episodios
                                     echo generate_episodes($season, $episodes_count, $available_count);
                                     echo '</div>';
                                     echo '</div>';
@@ -297,17 +341,16 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
                             ?>
                         </div>
                         
-                        <div class="season-section">
-                            <div class="season-header-title">HOUSE OF THE DRAGON</div>
-                            
+                        <div class="series-block">
+                            <h3 class="series-title">HOUSE OF THE DRAGON</h3>
                             <?php 
                                 // HotD (Simulamos 1 temporada con 10 episodios, 3 disponibles)
                                 $hotd_episodes = 10;
                                 $hotd_available = 3; 
 
-                                echo '<div class="season-section" style="margin-bottom: 5px;">';
-                                echo '<div class="season-header-title" style="background-color: #333; padding: 10px 15px;">Temporada 1</div>';
-                                echo '<div class="episode-list">';
+                                echo '<div class="admin-accordion-block">';
+                                echo '<div class="accordion-header"><h2>Temporada 1</h2><span class="accordion-arrow">V</span></div>';
+                                echo '<div class="accordion-content episode-list">';
                                 echo generate_episodes(1, $hotd_episodes, $hotd_available);
                                 echo '</div>';
                                 echo '</div>';

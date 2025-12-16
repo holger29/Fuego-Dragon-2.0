@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso Admin | Fuego Dragón</title>
-    <link rel="icon" type="image/png" href="activos/img/favicon_fd.png">
+    <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
     
     <link rel="stylesheet" href="activos/css/style.css"> 
     
