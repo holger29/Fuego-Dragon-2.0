@@ -30,12 +30,15 @@
 
         /* Contenedor del formulario */
         .auth-container {
-            width: 400px; /* Un poco más ancho para más campos */
+            max-width: 400px; /* Ancho máximo para el formulario */
+            width: 90%; /* Ancho flexible para pantallas pequeñas */
             padding: 30px;
             background-color: #1a1a1a; 
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
             text-align: center;
+            box-sizing: border-box; /* Para que el padding no afecte el ancho total */
+            margin: 20px 0; /* Margen vertical para evitar que se pegue en pantallas pequeñas */
         }
 
         h1 {
@@ -95,14 +98,18 @@
             font-size: 0.9em;
         }
         .link-group a {
-            color: #8fa0b5; 
+            color: gray;
             text-decoration: none;
             transition: color 0.3s;
         }
         .link-group a:hover {
             color: #a30000;
         }
-        
+        .link-group .iniciar_sesion {
+            font-weight: bold;
+            color: rgb(2, 139, 64);
+        }
+     
         /* Mensajes de feedback (ocultos por defecto) */
         .message {
             padding: 10px;
@@ -117,6 +124,16 @@
         .message.success {
             background-color: #28a745;
             color: white;
+        }
+
+        /* --- ESTILOS RESPONSIVE --- */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 25px 20px;
+            }
+            h1 {
+                font-size: 1.5em; /* Reducir un poco el título */
+            }
         }
     </style>
 </head>
@@ -156,7 +173,7 @@
         </form>
         
         <div class="link-group">
-            <a href="<?php echo $ruta_login; ?>">¿Ya tienes cuenta? Inicia sesión aquí.</a>
+            <a href="<?php echo $ruta_login; ?>">¿Ya tienes cuenta? <span class="iniciar_sesion">Inicia sesión aquí.</span></a>
             <br>
             <a href="<?php echo $ruta_regresar_home; ?>">← Volver a la página principal</a>
         </div>

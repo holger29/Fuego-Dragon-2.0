@@ -33,7 +33,8 @@ body {
     color: var(--color-text-light);
     background-color: var(--color-background-dark);
     /* Deshabilitar scroll si el contenido no lo requiere */
-    overflow: hidden;
+    overflow-X: hidden;
+    overflow-y:auto;
 }
 
 /* 1. Contenedor de Partículas */
@@ -69,8 +70,7 @@ header h1 {
     font-size: 5em;
     font-weight: bold;
     letter-spacing: 0.1em;
-    margin-bottom: 0.2em;
-    /* Fuente: Si deseas la fuente serif elegante, necesitarías importarla (ej. 'Playfair Display' de Google Fonts) */
+    margin-bottom: 0.2em;    font-family: 'Cinzel', serif;
 }
 
 header p {
@@ -102,15 +102,31 @@ header p {
     bottom: 20px;
     font-size: 0.8em;
 }
-
+/*para el footer perteneciente a la pagina LandingPage.php*/
 .admin-link a {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgb(20, 20, 20);
     text-decoration: none;
-    transition: color 0.3s;
 }
 
 .admin-link a:hover {
-    color: var(--color-text-light);
+    /*color: var(--color-text-light);*/
+}
+
+/* =================================
+   ESTILOS RESPONSIVE LANDING PAGE
+   ================================= */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 3em; /* Reducimos el tamaño del título principal */
+        letter-spacing: 0.05em;
+    }
+    header p {
+        font-size: 1em; /* Ajustamos el tamaño del párrafo */
+    }
+    .btn-registro {
+        padding: 10px 25px; /* Hacemos el botón un poco más pequeño */
+        font-size: 1em;
+    }
 }
 
 /* =================================
@@ -280,7 +296,7 @@ header p {
     box-sizing: border-box;
 }
 .btn-update-password {
-    background-color: #a30000;
+    background-color: #3f51b5;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -344,7 +360,7 @@ header p {
     margin-bottom: 15px;
 }
 .accordion-content .btn-submit {
-    background-color: #a30000;
+    background-color: #3f51b5;
     color: white;
     padding: 10px 20px;
     border: none;

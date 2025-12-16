@@ -18,6 +18,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
     
     <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
     <link rel="stylesheet" href="../activos/css/style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
         /* Estilos generales */
@@ -43,10 +44,22 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             align-items: center;
             border-bottom: 2px solid #a30000;
         }
-        .logo {
-            font-size: 1.8em;
-            color: #a30000;
-            font-weight: bold;
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+        .logo-container img {
+            height: 35px;
+            width: auto;
+        }
+        .logo-container h1 {
+            color: #ccc;
+            margin: 0;
+            font-size: 1.5em;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
         }
         .user-actions {
             display: flex;
@@ -165,7 +178,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             box-sizing: border-box;
         }
         .btn-update-password {
-            background-color: #a30000;
+            background-color: #3f51b5;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -213,7 +226,54 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             border-radius: 6px;
             border: 1px solid #ccc;
             resize: vertical;
-        }   
+        }
+
+        /* --- ESTILOS RESPONSIVE --- */
+        @media (max-width: 768px) {
+            /* Header principal */
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+                text-align: center;
+            }
+
+            /* Contenido del perfil */
+            .profile-content {
+                margin-top: 20px;
+                padding: 0 15px 40px 15px;
+            }
+            .profile-content h1 {
+                font-size: 1.8em;
+            }
+
+            /* Encabezado de sección (ej. "INFORMACIÓN DE LA CUENTA") */
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            /* Contenedor de datos de usuario a una columna */
+            .user-data-container {
+                grid-template-columns: 1fr;
+            }
+
+            /* Ajuste del textarea para ocupar todo el ancho disponible */
+            .accordion-content textarea {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -241,7 +301,10 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
 <body>
 
     <header class="main-header">
-        <div class="logo">FUEGO DRAGÓN</div>
+        <a href="<?php echo $ruta_dashboard; ?>" class="logo-container">
+            <img src="../activos/img/logo-fuegodragon-ok.png" alt="Fuego Dragón Logo">
+            <h1>FUEGO DRAGÓN</h1>
+        </a>
         <div class="user-actions">
             <span class="user-greeting">Bienvenido, <?php echo htmlspecialchars($usuario_nombre); ?></span>
             <a href="#" class="btn-profile">Mi Perfil</a> 
@@ -337,5 +400,12 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
         </div>
 
     </div>
+
+    <footer>
+        <p>
+            © <?php echo date("Y"); ?> Fuego Dragón - Todos los derechos reservados.<br>
+            V. 2.0.0
+        </p>
+    </footer>
 </body>
 </html>

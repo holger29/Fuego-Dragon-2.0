@@ -50,6 +50,7 @@ $temporadas = [
     <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
     <link rel="stylesheet" href="../activos/css/style.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
 
     
     <style>
@@ -73,10 +74,22 @@ $temporadas = [
             background-color: #1a1a1a;
             border-bottom: 3px solid #a30000;
         }
-        .navbar h1 {
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+        .logo-container img {
+            height: 35px;
+            width: auto;
+        }
+        .logo-container h1 {
             color: #ccc;
             margin: 0;
             font-size: 1.5em;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
         }
         .nav-actions {
             display: flex;
@@ -258,6 +271,62 @@ $temporadas = [
             cursor: pointer;
             font-size: 1.8em; /* Hacemos el candado un poco más grande */
         }
+
+        /* --- ESTILOS RESPONSIVE --- */
+        @media (max-width: 768px) {
+            /* Navbar */
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+            .navbar h1 {
+                font-size: 1.3em;
+            }
+
+            /* Contenedor principal */
+            .series-page-container {
+                padding: 0 15px 40px 15px;
+                margin-top: 20px;
+            }
+
+            /* Layout de una columna */
+            .series-detail-layout {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            /* Centrar poster */
+            .series-poster {
+                max-width: 300px;
+                margin: 0 auto;
+            }
+
+            /* Ajustes de texto */
+            .series-info-content h2 {
+                font-size: 2.2em;
+                text-align: center;
+            }
+
+            /* Episodios */
+            .episode-item {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .episode-actions {
+                justify-content: center;
+            }
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
     </style>
     
     <script>
@@ -288,7 +357,10 @@ $temporadas = [
 </head>
 <body>
     <header class="navbar">
-        <h1>FUEGO DRAGÓN</h1>
+        <a href="<?php echo $ruta_dashboard; ?>" class="logo-container">
+            <img src="../activos/img/logo-fuegodragon-ok.png" alt="Fuego Dragón Logo">
+            <h1>FUEGO DRAGÓN</h1>
+        </a>
         <div class="nav-actions">
             <span class="user-greeting">Bienvenido, <?php echo $nombre_usuario; ?></span>
             <a href="<?php echo $ruta_perfil; ?>" class="btn-profile">Mi Perfil</a>
@@ -347,5 +419,13 @@ $temporadas = [
             </div>
         </div>
     </div>
+
+    <footer>
+        <p>
+            © <?php echo date("Y"); ?> Fuego Dragón - Todos los derechos reservados.<br>
+            V. 2.0.0
+        </p>
+    </footer>
+
 </body>
 </html>

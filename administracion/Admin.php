@@ -23,12 +23,14 @@
 
         /* Contenedor del formulario (simulando la imagen de ejemplo) */
         .login-container {
-            width: 350px;
+            max-width: 350px;
+            width: 90%; /* Asegura que no toque los bordes en pantallas pequeñas */
             padding: 30px;
             background-color: #333d4b; /* Fondo oscuro del contenedor */
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             text-align: center;
+            box-sizing: border-box; /* Importante para que el padding no afecte el ancho total */
         }
 
         h1 {
@@ -78,6 +80,16 @@
             color: #CCC;
             text-decoration: none;
             font-size: 0.9em;
+        }
+
+        /* --- ESTILOS RESPONSIVE --- */
+        @media (max-width: 400px) {
+            .login-container {
+                padding: 25px 20px;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
         }
     </style>
 </head>

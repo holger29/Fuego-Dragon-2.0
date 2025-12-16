@@ -43,9 +43,22 @@ $ruta_HotD="page_HotD.php";
             border-bottom: 1px solid #222;
         }
 
-        header h1 {
-            font-size: 22px;
-            letter-spacing: 2px;
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+        .logo-container img {
+            height: 35px;
+            width: auto;
+        }
+        .logo-container h1 {
+            font-size: 1.5em;
+            letter-spacing: 1px;
+            color: #ccc;
+            margin: 0;
+            font-family: 'Cinzel', serif;
         }
 
         .user-actions {
@@ -155,12 +168,51 @@ $ruta_HotD="page_HotD.php";
             font-size: 12px;
             opacity: 0.6;
         }
+
+        /* --- ESTILOS RESPONSIVE --- */
+        @media (max-width: 768px) {
+            /* Header */
+            header {
+                flex-direction: column; /* Apila el logo y las acciones */
+                gap: 15px;
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 20px; /* Un poco más pequeño */
+            }
+
+            .user-actions {
+                width: 100%;
+                justify-content: center; /* Centra los botones */
+            }
+
+            /* Main */
+            main h2 {
+                font-size: 1.5em; /* Ajusta el título principal */
+            }
+
+            .sagas {
+                gap: 25px; /* Reduce el espacio entre tarjetas */
+            }
+
+            .card img {
+                height: 350px; /* Reduce la altura de la imagen en móviles */
+            }
+
+            .card-content h3 {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>FUEGO DRAGÓN</h1>
+    <a href="#" class="logo-container">
+        <img src="../activos/img/logo-fuegodragon-ok.png" alt="Fuego Dragón Logo">
+        <h1>FUEGO DRAGÓN</h1>
+    </a>
     <div class="user-actions">
         <span>Bienvenido, <?= $usuario ?></span>
         <a href="<?php echo $ruta_perfil; ?>" class="btn btn-profile">Mi Perfil</a>
@@ -175,7 +227,7 @@ $ruta_HotD="page_HotD.php";
 
         <!-- Game of Thrones -->
         <article class="card">
-            <img src="../activos/img/Game_of_Thrones.webp" alt="Game of Thrones">
+            <img src="../activos/img/juegodeTronos.png" alt="Game of Thrones">
             <div class="card-content">
                 <h3>Game of Thrones</h3>
                 <a href="<?php echo $ruta_GoT?>">Ver serie GoT</a>

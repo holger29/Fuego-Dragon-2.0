@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fuego Dragón</title>
     <link rel="stylesheet" href="activos/css/style.css">
-<!-------- Partículas JS Usando CDN Normal------>
-    <script src="https://cdn.jsdelivr.net/npm/tsparticles-slim@2.12.0/tsparticles.slim.min.js"></script>
-<!--Particulas usando CDN local-->
-    <script src="activos/js/tsparticles.slim.min.js"></script>
-<!--Favicon-->
-    <link rel="icon" type="image/png" href="/activos/img/favicon_fd.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+    <!--Favicon-->
+    <link rel="icon" type="image/png" href="activos/img/favicon_fd.png">
+   
 </head>
 <body>
 
@@ -23,10 +21,9 @@
         </header>
 
         <footer class="admin-link">
-            <a href="admin.php">Admin Panel</a>
+            <a href="administracion/admin.php">Admin Panel</a>
         </footer>
     </div>
 
-    <script src="activos/js/particles_config.js"></script>
 </body>
 </html>
