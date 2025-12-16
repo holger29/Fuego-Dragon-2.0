@@ -4,7 +4,10 @@ $usuario_nombre = "Daniela María Hurtado";
 $usuario_email = "danielam12@gmail.com";
 $usuario_pais = "Nicaragua";
 $usuario_ciudad = "Managua";
-$usuario_celular = "50535985477";
+// DATOS SIMULADOS: Se divide el número en prefijo y número
+$usuario_celular_prefijo = "+505"; // Prefijo de Nicaragua
+$usuario_celular_numero = "35985477"; // Número sin prefijo
+
 $ruta_dashboard = "dashboard.php";
 $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
 ?>
@@ -23,7 +26,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
     <style>
         /* Estilos generales */
         html, body {
-            height: 100%; /* Aseguramos que el HTML y el Body ocupen 100% */
+            height: 100%;
             margin: 0;
             padding: 0;
         }
@@ -31,12 +34,11 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             background-color: #121212;
             color: #f4f4f4;
             font-family: Arial, sans-serif;
-            overflow-y: scroll; /* Forzamos la barra de desplazamiento */
+            overflow-y: scroll;
         }
         .main-header {
-         /* Aseguramos que la barra ocupe 100% de ancho */
             width: 100%; 
-            box-sizing: border-box; /* Incluye padding en el ancho total */
+            box-sizing: border-box;
             background-color: #1a1a1a;
             padding: 15px 40px;
             display: flex;
@@ -71,9 +73,8 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             color: #ccc;
         }
         
-       
         .btn-logout {
-            background-color: #a30000; /* Rojo */
+            background-color: #a30000;
             color: white;
         }
         
@@ -87,7 +88,6 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             padding: 0 20px;
             padding-bottom: 80px; 
         }
-        /* ... (Estilos de h1 y btn-back-to-dashboard) ... */
         
         /* Secciones del Perfil */
         .profile-section {
@@ -110,12 +110,11 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             font-size: 1.5em;
             margin: 0;
         }
-        /* ... (Estilos de btn-edit) ... */
 
         /* Datos Personales y Contraseña (Contenedor principal en dos columnas) */
         .user-data-container {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* CREAMOS LAS DOS COLUMNAS */
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
         .data-display {
@@ -123,9 +122,8 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             flex-direction: column;
             gap: 15px;
         }
-        /* ... (Estilos de data-item, data-label, data-value) ... */
 
-        /* CONTENEDOR DE CAMBIO DE CONTRASEÑA (Acordeón que vive en la segunda columna) */
+        /* Contenedor de cambio de contraseña */
         .change-password-area {
             background-color: #2a2a2a;
             border-radius: 6px;
@@ -134,7 +132,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
         }
         .change-password-header {
             padding: 15px;
-            background-color: #3a3a3a; /* Header distinto para el acordeón interno */
+            background-color: #3a3a3a;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -168,7 +166,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             padding-bottom: 20px;
         }
         .change-password-form input {
-            width: 100%; /* Ocupa todo el ancho de la columna */
+            width: 100%;
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #333;
@@ -187,9 +185,8 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             font-weight: bold;
         }
 
-        /* ACORDEÓN GENERAL (Para Historial, Adquirido, Comentarios) */
+        /* ACORDEÓN GENERAL (Historial, Adquirido, Comentarios) */
         .accordion-block {
-            /* ... (estilos iguales a los anteriores para el acordeón principal) ... */
             background-color: #1a1a1a;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -217,8 +214,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             transition: max-height 0.3s ease-in-out;
             padding: 0 25px;
         }
-        /* ... (Estilos de feedback) ... */
-        /**para el txtarea del formulario */
+
         .accordion-content textarea {
             width: 90%;
             min-height: 120px;
@@ -230,7 +226,6 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
 
         /* --- ESTILOS RESPONSIVE --- */
         @media (max-width: 768px) {
-            /* Header principal */
             .main-header {
                 flex-direction: column;
                 gap: 15px;
@@ -238,7 +233,6 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
                 text-align: center;
             }
 
-            /* Contenido del perfil */
             .profile-content {
                 margin-top: 20px;
                 padding: 0 15px 40px 15px;
@@ -247,19 +241,16 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
                 font-size: 1.8em;
             }
 
-            /* Encabezado de sección (ej. "INFORMACIÓN DE LA CUENTA") */
             .section-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
             }
 
-            /* Contenedor de datos de usuario a una columna */
             .user-data-container {
                 grid-template-columns: 1fr;
             }
 
-            /* Ajuste del textarea para ocupar todo el ancho disponible */
             .accordion-content textarea {
                 width: 100%;
                 box-sizing: border-box;
@@ -343,9 +334,12 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
                         <span class="data-label">Ciudad:</span>
                         <span class="data-value"><?php echo htmlspecialchars($usuario_ciudad); ?></span>
                     </div>
+                    
                     <div class="data-item">
                         <span class="data-label">Celular:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_celular); ?></span>
+                        <span class="data-value">
+                            <?php echo htmlspecialchars($usuario_celular_prefijo . ' ' . $usuario_celular_numero); ?>
+                        </span>
                     </div>
                 </div>
 
