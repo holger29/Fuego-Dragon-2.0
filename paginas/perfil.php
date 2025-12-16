@@ -57,42 +57,13 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             font-size: 1em;
             color: #ccc;
         }
-        .btn-profile, .btn-logout {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: bold;
-            transition: opacity 0.3s;
-        }
-        .btn-profile {
-            background-color: #3f51b5; /* Azul */
-            color: white;
-        }
+        
+       
         .btn-logout {
             background-color: #a30000; /* Rojo */
             color: white;
         }
-        .btn-profile:hover, .btn-logout:hover {
-            opacity: 0.8;
-        }
-        .btn-back-to-dashboard {
-            display: inline-block;
-            background-color: #545454;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .btn-back-to-dashboard:hover {
-            background-color: rgb(45, 45, 45);
-            border: solid 1px red;
-            transform: translateY(-1px);
-        }
+        
         .h1 {
             text-align:center;
         }
@@ -233,9 +204,16 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             transition: max-height 0.3s ease-in-out;
             padding: 0 25px;
         }
-        
-        /* ... (Estilos de feedback y no-data) ... */
-
+        /* ... (Estilos de feedback) ... */
+        /**para el txtarea del formulario */
+        .accordion-content textarea {
+            width: 90%;
+            min-height: 120px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }   
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

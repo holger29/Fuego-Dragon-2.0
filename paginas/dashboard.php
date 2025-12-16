@@ -3,6 +3,8 @@
 $usuario = "holgereduardo777";
 $ruta_perfil="perfil.php";
 $ruta_LandingPage="../LandingPage.php";
+$ruta_GoT="page_GoT.php";
+$ruta_HotD="page_HotD.php";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -13,7 +15,8 @@ $ruta_LandingPage="../LandingPage.php";
 
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="../activos/css/style.css">
+    <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
     <style>
         * {
             margin: 0;
@@ -26,6 +29,7 @@ $ruta_LandingPage="../LandingPage.php";
             background: radial-gradient(circle at top, #0d1b2a, #000814);
             color: #fff;
             min-height: 100vh;
+            overflow-y:auto;
         }
 
         /* HEADER */
@@ -62,10 +66,6 @@ $ruta_LandingPage="../LandingPage.php";
             color: #fff;
             border: none;
             cursor: pointer;
-        }
-
-        .btn-profile {
-            background: #2b2d42;
         }
 
         .btn-logout {
@@ -177,7 +177,7 @@ $ruta_LandingPage="../LandingPage.php";
             <img src="../activos/img/Game_of_Thrones.webp" alt="Game of Thrones">
             <div class="card-content">
                 <h3>Game of Thrones</h3>
-                <a href="#">Ver serie GoT</a>
+                <a href="<?php echo $ruta_GoT?>">Ver serie GoT</a>
             </div>
         </article>
 
@@ -186,7 +186,7 @@ $ruta_LandingPage="../LandingPage.php";
             <img src="../activos/img/lacasadeldragon.png" alt="House of the Dragon">
             <div class="card-content">
                 <h3>House of the Dragon</h3>
-                <a href="#">Ver serie HOTD</a>
+                <a href="<?php echo $ruta_HotD?>">Ver serie HOTD</a>
             </div>
         </article>
 
@@ -194,7 +194,11 @@ $ruta_LandingPage="../LandingPage.php";
 </main>
 
 <footer>
-    © <?= date("Y") ?> Fuego Dragón - Todos los derechos reservados
+    <p>
+        © <?= date("Y") ?> Fuego Dragón - Todos los derechos reservados</br>
+        V. 2.0.0
+    </p>
+        
 </footer>
 
 </body>

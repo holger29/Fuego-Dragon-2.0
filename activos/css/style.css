@@ -4,6 +4,28 @@
     --color-text-light: #f4f4f4;
     --color-background-dark: #121212;
 }
+/* =================================
+   BOTÓN REUTILIZABLE - VOLVER
+   ================================= */
+.btn-back-to-dashboard {
+    display: inline-block;
+    background-color: #545454;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-bottom: 20px; /* Añadido para dar un espacio inferior consistente */
+}
+
+.btn-back-to-dashboard:hover {
+    background-color: rgb(45, 45, 45);
+    border: solid 1px red;
+    transform: translateY(-1px);
+}
+
 
 body {
     margin: 0;
@@ -90,3 +112,270 @@ header p {
 .admin-link a:hover {
     color: var(--color-text-light);
 }
+
+/* =================================
+   ESTILOS PÁGINA DE PERFIL
+   ================================= */
+
+/* Header específico de páginas internas (perfil, etc.) */
+.main-header {
+    width: 100%; 
+    box-sizing: border-box;
+    background-color: #1a1a1a;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #a30000;
+}
+.main-header .logo {
+    font-size: 1.8em;
+    color: #a30000;
+    font-weight: bold;
+}
+.main-header .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.main-header .user-greeting {
+    font-size: 1em;
+    color: #ccc;
+}
+.main-header .btn-profile, .main-header .btn-logout {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+.main-header .btn-profile {
+    background-color: #3f51b5; /* Azul */
+    color: white;
+}
+.main-header .btn-logout {
+    background-color: #a30000; /* Rojo */
+    color: white;
+}
+.main-header .btn-profile:hover, .main-header .btn-logout:hover {
+    opacity: 0.8;
+}
+
+/* Contenido específico del perfil */
+.profile-content {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px 80px 20px; 
+}
+.profile-content h1 {
+    text-align: center;
+}
+
+/* Secciones del Perfil */
+.profile-section {
+    background-color: #1a1a1a;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+.section-header h2 {
+    color: #a30000;
+    font-size: 1.5em;
+    margin: 0;
+}
+.section-header .btn-edit {
+    /* Estilos para el botón de editar que faltaban */
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Datos Personales y Contraseña (Contenedor principal en dos columnas) */
+.user-data-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.data-display {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.data-item {
+    display: flex;
+    flex-direction: column;
+}
+.data-label {
+    font-size: 0.9em;
+    color: #888;
+    margin-bottom: 4px;
+}
+.data-value {
+    font-size: 1.1em;
+    color: #f4f4f4;
+}
+
+/* Contenedor de cambio de contraseña (Acordeón interno) */
+.change-password-area {
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+.change-password-header {
+    padding: 15px;
+    background-color: #3a3a3a;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.change-password-header h3 {
+    color: #f4f4f4;
+    margin: 0;
+    font-size: 1.2em;
+}
+.change-password-area .arrow {
+    font-size: 1.5em;
+    transition: transform 0.3s;
+    color: #ccc;
+}
+.change-password-area.active .arrow {
+    transform: rotate(90deg);
+    color: #a30000;
+}
+.change-password-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    padding: 0 20px;
+}
+.change-password-area.active .change-password-content {
+    max-height: 500px;
+    padding: 20px;
+}
+.change-password-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #121212;
+    color: white;
+    box-sizing: border-box;
+}
+.btn-update-password {
+    background-color: #a30000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Acordeón general (Historial, Adquirido, Comentarios) */
+.accordion-block {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+.accordion-header {
+    padding: 20px 25px;
+    background-color: #2a2a2a; 
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+.accordion-header h2 {
+    color: #f4f4f4;
+    font-size: 1.3em;
+    margin: 0;
+}
+.accordion-block .arrow {
+    font-size: 1.5em;
+    transition: transform 0.3s;
+    color: #ccc;
+}
+.accordion-block.active .arrow {
+    transform: rotate(90deg);
+}
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    padding: 0 25px;
+    color: #ccc;
+}
+.accordion-block.active .accordion-content {
+    max-height: 500px; 
+    padding: 25px;
+}
+.accordion-content textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 120px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    resize: vertical;
+    background-color: #121212;
+    color: white;
+    margin-bottom: 15px;
+}
+.accordion-content .btn-submit {
+    background-color: #a30000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+/*page_HotD.php*/
+/*imagenes dentro del div episode-actions*/
+.episode-actions img {
+    width: 11%;
+    height: auto;
+    vertical-align: middle;
+    cursor:pointer;
+    /*background-color: navy;*/
+}
+/*estilos en el Boton del perfil. estos botones se encuentran en el header
+de las paginas de perfil.php, dashboard.php, page_GoT.php y page_HotD*/
+ .btn-profile {
+            background-color: #3f51b5; /* Azul */
+            color: white;
+        }
+.btn-profile, .btn-logout {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }   
+.btn-profile:hover, .btn-logout:hover {
+            opacity: 0.8;
+        }             

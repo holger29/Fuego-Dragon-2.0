@@ -14,7 +14,6 @@
 </head>
 <body>
 
-    <div id="tsparticles"></div>
 
     <div class="content-wrapper">
         <header>
