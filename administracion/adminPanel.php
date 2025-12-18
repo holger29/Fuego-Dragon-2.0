@@ -108,9 +108,9 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
             color: #ccc;
         }
         .admin-accordion-block.active .accordion-content {
-            max-height: 5000px; /* Suficiente para todo el contenido */
-            padding-top: 25px; 
-            padding-bottom: 25px;
+            max-height: 10000px; /* Aumentado para asegurar que todo el contenido sea visible */
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
 
         /* Estilos para el acordeón de temporada (anidado) */
@@ -126,6 +126,7 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
             background-color: #121417;
             padding: 20px;
             border-radius: 6px;
+            overflow-y:auto;
         }
         .upload-info {
             font-style: italic;
@@ -245,14 +246,30 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
 
         /* --- ESTILOS RESPONSIVE --- */
         @media (max-width: 768px) {
+            .content-management-area{
+                padding:5px;
+            }
             .admin-header {
-                padding: 15px 20px;
+                padding: 10px;
+                padding: 15px 10px; /* Reducido padding horizontal */
             }
             .admin-header h1 {
                 font-size: 1.5em;
             }
+            .accordion-header {
+                padding: 3px;
+                padding: 15px 10px; /* Reducido padding horizontal */
+            }
+            .admin-accordion-block.active .accordion-content {
+                padding-top: 20px;
+                padding-bottom: 20px;
+                padding-left: 10px; 
+                padding-right: 10px;
+                overflow-y:auto;
+            }
             .admin-content {
-                margin: 20px auto;
+                margin: 10px auto;
+                padding: 0 2px; /* Reducido padding horizontal del contenedor principal */
             }
             .episode-item {
                 grid-template-columns: 1fr; /* Apila los elementos */

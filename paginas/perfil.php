@@ -122,6 +122,29 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             flex-direction: column;
             gap: 15px;
         }
+        /* Formulario de edición (oculto por defecto) */
+        .data-edit-form {
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            gap: 15px;
+        }
+        .data-edit-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #121212;
+            color: white;
+            box-sizing: border-box;
+        }
+        .edit-form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-save { background-color: #28a745; color: white; }
+        .btn-cancel { background-color: #6c757d; color: white; }
+
 
         /* Contenedor de cambio de contraseña */
         .change-password-area {
@@ -286,6 +309,59 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
                     block.classList.toggle('active');
                 });
             }
+
+            // --- LÓGICA PARA EDITAR DATOS DE USUARIO ---
+            const btnEdit = document.querySelector('.btn-edit');
+            const btnSave = document.querySelector('.btn-save');
+            const btnCancel = document.querySelector('.btn-cancel');
+            
+            const dataDisplay = document.querySelector('.data-display');
+            const dataEditForm = document.querySelector('.data-edit-form');
+
+            if (btnEdit && dataDisplay && dataEditForm) {
+                // Inputs del formulario
+                const inputNombre = document.getElementById('edit-nombre');
+                const inputEmail = document.getElementById('edit-email');
+                const inputPais = document.getElementById('edit-pais');
+                const inputCiudad = document.getElementById('edit-ciudad');
+                const inputCelular = document.getElementById('edit-celular');
+
+                // Spans de visualización
+                const displayNombre = document.getElementById('display-nombre');
+                const displayEmail = document.getElementById('display-email');
+                const displayPais = document.getElementById('display-pais');
+                const displayCiudad = document.getElementById('display-ciudad');
+                const displayCelular = document.getElementById('display-celular');
+
+                // Al hacer clic en "Editar"
+                btnEdit.addEventListener('click', () => {
+                    dataDisplay.style.display = 'none';
+                    dataEditForm.style.display = 'flex';
+                    btnEdit.style.display = 'none';
+                });
+
+                // Al hacer clic en "Cancelar"
+                btnCancel.addEventListener('click', () => {
+                    dataDisplay.style.display = 'flex';
+                    dataEditForm.style.display = 'none';
+                    btnEdit.style.display = 'inline-block';
+                });
+
+                // Al hacer clic en "Guardar Cambios" (simulación frontend)
+                btnSave.addEventListener('click', () => {
+                    // Actualizar los valores en la vista de solo lectura
+                    displayNombre.textContent = inputNombre.value;
+                    displayEmail.textContent = inputEmail.value;
+                    displayPais.textContent = inputPais.value;
+                    displayCiudad.textContent = inputCiudad.value;
+                    displayCelular.textContent = inputCelular.value;
+
+                    // Volver a la vista de solo lectura
+                    dataDisplay.style.display = 'flex';
+                    dataEditForm.style.display = 'none';
+                    btnEdit.style.display = 'inline-block';
+                });
+            }
         });
     </script>
 </head>
@@ -317,31 +393,47 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             </div>
             
             <div class="user-data-container">
-                <div class="data-display">
+                <!-- VISTA DE SOLO LECTURA -->
+                <div class="data-display" style="display: flex;">
                     <div class="data-item">
                         <span class="data-label">Nombre:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_nombre); ?></span>
+                        <span class="data-value" id="display-nombre"><?php echo htmlspecialchars($usuario_nombre); ?></span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">Email:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_email); ?></span>
+                        <span class="data-value" id="display-email"><?php echo htmlspecialchars($usuario_email); ?></span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">País:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_pais); ?></span>
+                        <span class="data-value" id="display-pais"><?php echo htmlspecialchars($usuario_pais); ?></span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">Ciudad:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_ciudad); ?></span>
+                        <span class="data-value" id="display-ciudad"><?php echo htmlspecialchars($usuario_ciudad); ?></span>
                     </div>
                     
                     <div class="data-item">
                         <span class="data-label">Celular:</span>
-                        <span class="data-value">
+                        <span class="data-value" id="display-celular">
                             <?php echo htmlspecialchars($usuario_celular_prefijo . ' ' . $usuario_celular_numero); ?>
                         </span>
                     </div>
                 </div>
+
+                <!-- FORMULARIO DE EDICIÓN (OCULTO) -->
+                <div class="data-edit-form">
+                    <input type="text" id="edit-nombre" value="<?php echo htmlspecialchars($usuario_nombre); ?>">
+                    <input type="email" id="edit-email" value="<?php echo htmlspecialchars($usuario_email); ?>">
+                    <input type="text" id="edit-pais" value="<?php echo htmlspecialchars($usuario_pais); ?>">
+                    <input type="text" id="edit-ciudad" value="<?php echo htmlspecialchars($usuario_ciudad); ?>">
+                    <input type="text" id="edit-celular" value="<?php echo htmlspecialchars($usuario_celular_prefijo . ' ' . $usuario_celular_numero); ?>">
+                    
+                    <div class="edit-form-actions">
+                        <button class="btn-save btn-edit">Guardar Cambios</button>
+                        <button class="btn-cancel btn-edit">Cancelar</button>
+                    </div>
+                </div>
+
 
                 <div class="change-password-area">
                     <div class="change-password-header">

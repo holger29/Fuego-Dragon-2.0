@@ -233,6 +233,7 @@ $temporadas = [
         .accordion-block.active .accordion-content {
             /* Altura suficiente para mostrar todos los 10 episodios sin problemas de scroll interno */
             max-height: 1200px; 
+            overflow-y:auto;
         }
         
         /* Estilos de Episodio */
