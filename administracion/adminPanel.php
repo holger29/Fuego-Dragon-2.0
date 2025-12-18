@@ -14,7 +14,7 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
     
     <link rel="icon" type="image/png" href="activos/img/favicon_fd.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="activos/css/style.css"> 
+    <link rel="stylesheet" href="../activos/css/style.css"> 
     <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
     
     <style>
@@ -220,6 +220,29 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
             opacity: 0.8;
         }
 
+        /* --- ESTILOS PARA COMENTARIOS DE USUARIOS --- */
+        .feedback-item {
+            background-color: #2b394d;
+            border: 1px solid #3a4b63;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+        }
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3a4b63;
+            font-size: 0.9em;
+            flex-wrap: wrap; /* Para que se ajuste en pantallas pequeñas */
+        }
+        .feedback-user { font-weight: bold; color: #f4f4f4; }
+        .feedback-date { color: #8fa0b5; }
+        .feedback-body p { margin: 0; line-height: 1.6; color: #ccc; }
+
+
         /* --- ESTILOS RESPONSIVE --- */
         @media (max-width: 768px) {
             .admin-header {
@@ -361,14 +384,114 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
                 </div>
             </div>
         </div>
-
+        
         <div class="admin-accordion-block">
             <div class="accordion-header">
-                <h2>GESTIONAR USUARIOS (5)</h2>
+                <h2>GESTIONAR USUARIOS</h2>
                 <span class="accordion-arrow">V</span>
             </div>
             <div class="accordion-content">
-                <p>Aquí irá la tabla de usuarios con opciones para editar y eliminar (CRUD de Usuarios).</p>
+                <div class="content-area">
+                    <!-- Barra de búsqueda -->
+                    <div class="search-bar">
+                        <input type="search" id="userSearch" placeholder="Buscar por ID, nombre, correo, país...">
+                        <button type="button">Buscar</button>
+                    </div>
+
+                    <!-- Botón para Guardar Cambios -->
+                    <div class="table-actions-bar">
+                        <button type="button" id="saveAllUsers" class="btn-save-all">
+                            <i class="fa-solid fa-save"></i> Guardar Todos los Cambios
+                        </button>
+                    </div>
+
+                    <!-- Tabla de Usuarios -->
+                    <div style="overflow-x:auto;">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>País</th>
+                                    <th>Ciudad</th>
+                                    <th>Celular</th>
+                                    <th>Contraseña</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Fila de ejemplo 1 -->
+                                <tr>
+                                    <td>1</td>
+                                    <td>Jon Nieve</td>
+                                    <td>jon.nieve@thewall.com</td>
+                                    <td>Westeros</td>
+                                    <td>Winterfell</td>
+                                    <td>+01 123456789</td>
+                                    <td>********</td>
+                                    <td>2024-01-15 10:30</td>
+                                    <td>
+                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
+                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
+                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Fila de ejemplo 2 -->
+                                <tr>
+                                    <td>2</td>
+                                    <td>Daenerys Targaryen</td>
+                                    <td>dany.t@dragonstone.com</td>
+                                    <td>Essos</td>
+                                    <td>Meereen</td>
+                                    <td>+02 987654321</td>
+                                    <td>********</td>
+                                    <td>2024-02-20 14:00</td>
+                                    <td>
+                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
+                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
+                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Fila de ejemplo 3 -->
+                                <tr>
+                                    <td>3</td>
+                                    <td>Tyrion Lannister</td>
+                                    <td>tyrion.l@casterlyrock.com</td>
+                                    <td>Westeros</td>
+                                    <td>King's Landing</td>
+                                    <td>+03 555555555</td>
+                                    <td>********</td>
+                                    <td>2024-03-10 09:00</td>
+                                    <td>
+                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
+                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
+                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Fila de ejemplo 4 -->
+                                <tr>
+                                    <td>4</td>
+                                    <td>Holger Edud Angulo Castillo</td>
+                                    <td>holgereduardo777@gmail.com</td>
+                                    <td>Colombia</td>
+                                    <td>Soacha</td>
+                                    <td>+57 3233980456</td>
+                                    <td>********</td>
+                                    <td>2025-09-01 16:00</td>
+                                    <td>
+                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
+                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
+                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- NOTA: La columna 'contraseña' no se muestra por seguridad. -->
+                                <!-- Aquí se agregarían más filas de usuarios dinámicamente con PHP -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -378,7 +501,18 @@ $ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página in
                 <span class="accordion-arrow">V</span>
             </div>
             <div class="accordion-content">
-                <p>Aquí se mostrarán los comentarios y sugerencias enviados desde los feedback de los usuarios.</p>
+                <div class="content-area">
+                    <!-- Simulación de un comentario de usuario -->
+                    <div class="feedback-item">
+                        <div class="feedback-header">
+                            <span class="feedback-user">Jon Nieve (jon.nieve@thewall.com)</span>
+                            <span class="feedback-date">2024-05-21 15:45</span>
+                        </div>
+                        <div class="feedback-body">
+                            <p>Sería genial si pudieran añadir subtítulos en Dothraki para la primera temporada de Game of Thrones. Por lo demás, la plataforma es excelente. ¡Gracias!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
