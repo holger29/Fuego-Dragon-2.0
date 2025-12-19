@@ -375,7 +375,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
         <div class="user-actions">
             <span class="user-greeting">Bienvenido, <?php echo htmlspecialchars($usuario_nombre); ?></span>
             <a href="#" class="btn-profile">Mi Perfil</a> 
-            <a href="<?php echo $ruta_salir; ?>" class="btn-logout">Salir</a>
+            <a href="../autenticacion/logout.php" class="btn-logout">Salir</a>
         </div>
     </header>
 

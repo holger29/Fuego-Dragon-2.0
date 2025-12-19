@@ -230,7 +230,7 @@ $usuario = htmlspecialchars($_SESSION['usuario_nombre']);
     <div class="user-actions">
         <span>Bienvenido, <?= $usuario ?></span>
         <a href="<?php echo $ruta_perfil; ?>" class="btn btn-profile">Mi Perfil</a>
-        <a href="<?php echo $ruta_LandingPage; ?>" class="btn btn-logout">Salir</a>
+        <a href="../autenticacion/logout.php" class="btn btn-logout">Salir</a>
     </div>
 </header>
 
