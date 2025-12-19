@@ -224,6 +224,7 @@ $temporadas = [
         /* Muestra solo la primera temporada abierta por defecto para el ejemplo */
         .accordion-block:nth-child(2) .accordion-arrow {
             /* Simular abierto al inicio si es necesario, si no, usa el JS */
+            /*padding:10px;*/
         }
         .accordion-content {
             max-height: 0;

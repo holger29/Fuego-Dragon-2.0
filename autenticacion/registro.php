@@ -234,10 +234,10 @@
     <div class="auth-container">
         <h1>REGISTRO DE NUEVO USUARIO</h1>
 
-        <form action="<?php echo $ruta_login; ?>" method="POST">
+        <form action="guardar_usuario.php" method="POST">
             <div class="form-group">
                 <label for="nombre">Nombre Completo:</label>
-                <input type="text" id="nombre" name="nombre" required>
+                <input type="text" id="nombre" name="nombre_completo" required>
             </div>
             
             <div class="form-group">
@@ -246,24 +246,24 @@
             </div>
             
             <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required>
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" id="contrasena" name="contrasena" required>
             </div>
             
             <div class="form-group">
                 <label for="pais">País de Residencia:</label>
-                <input type="text" id="pais" name="pais" oninput="actualizarPrefijoCelular()" required>
+                <input type="text" id="pais" name="pais_residencia" oninput="actualizarPrefijoCelular()" required>
             </div>
             
             <div class="form-group">
                 <label for="ciudad">Ciudad de Residencia:</label>
-                <input type="text" id="ciudad" name="ciudad" required>
+                <input type="text" id="ciudad" name="ciudad_residencia" required>
             </div>
             
             <div class="form-group">
                 <label for="celular_numero">Celular:</label>
                 <div class="celular-input-group">
-                    <input type="text" id="prefijo_celular" value="" readonly title="Prefijo de país" name="prefijo_celular_display">
+                    <input type="text" id="prefijo_celular" value="" readonly title="Prefijo de país" name="codigo_celular">
                     <input type="text" id="celular_numero" name="celular" placeholder="Número de celular" required>
                 </div>
             </div>

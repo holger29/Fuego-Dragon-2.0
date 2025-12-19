@@ -92,10 +92,10 @@
     <div class="login-container">
         <h1>INICIO DE SESIÓN</h1>
 
-        <form action="<?php echo $ruta_dashboard; ?>" method="">
+        <form action="validar_login.php" method="POST">
 
             <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Contraseña" required>
+            <input type="password" name="contrasena" placeholder="Contraseña" required>
 
             <button type="submit" class="btn-acceder">
                Acceder

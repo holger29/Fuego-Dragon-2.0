@@ -1,10 +1,24 @@
 <?php
+// 1. Siempre iniciar la sesión en la primera línea
+session_start();
+
 // Simulación de sesión (solo frontend)
-$usuario = "holgereduardo777";
+/*$usuario = "holgereduardo777";
+*/
 $ruta_perfil="perfil.php";
 $ruta_LandingPage="../LandingPage.php";
 $ruta_GoT="page_GoT.php";
 $ruta_HotD="page_HotD.php";
+
+// 2. Control de seguridad: Si no existe la sesión, redirigir al login
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: ../autenticacion/login.php");
+    exit();
+}
+
+// 3. Tomamos el nombre real de la sesión (el que guardamos en validar_login.php)
+// Usamos htmlspecialchars para evitar ataques XSS
+$usuario = htmlspecialchars($_SESSION['usuario_nombre']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
