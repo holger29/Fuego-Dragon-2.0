@@ -1,15 +1,32 @@
 <?php
-// SIMULACIÓN de variables de sesión para el frontend
-$usuario_nombre = "Daniela María Hurtado";
-$usuario_email = "danielam12@gmail.com";
-$usuario_pais = "Nicaragua";
-$usuario_ciudad = "Managua";
-// DATOS SIMULADOS: Se divide el número en prefijo y número
-$usuario_celular_prefijo = "+505"; // Prefijo de Nicaragua
-$usuario_celular_numero = "35985477"; // Número sin prefijo
+// 1. Iniciar sesión y conectar a la BD
+session_start();
+include("../conexion/conexion.php");
 
-$ruta_dashboard = "dashboard.php";
-$ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
+// 2. Control de acceso
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: ../autenticacion/login.php");
+    exit();
+}
+
+$id_usuario = $_SESSION['usuario_id'];
+
+// 3. Consultar datos reales del usuario
+$sql = "SELECT nombre_completo, email, pais_residencia, ciudad_residencia, celular FROM usuarios WHERE id = ?";
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("i", $id_usuario);
+$stmt->execute();
+$resultado = $stmt->get_result();
+$datos = $resultado->fetch_assoc();
+
+// 4. Variables para el HTML
+$usuario_nombre = $datos['nombre_completo'];
+$usuario_email  = $datos['email'];
+$usuario_pais   = $datos['pais_residencia'];
+$usuario_ciudad = $datos['ciudad_residencia'];
+$usuario_celular_completo = $datos['celular']; // Ejemplo: "+505 35985477"
+
+$ruta_salir = "../autenticacion/logout.php"; // Simula cierre de sesión
 ?>
 
 <!DOCTYPE html>
@@ -122,6 +139,29 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             flex-direction: column;
             gap: 15px;
         }
+        /* Formulario de edición (oculto por defecto) */
+        .data-edit-form {
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            gap: 15px;
+        }
+        .data-edit-form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #121212;
+            color: white;
+            box-sizing: border-box;
+        }
+        .edit-form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-save { background-color: #28a745; color: white; }
+        .btn-cancel { background-color: #6c757d; color: white; }
+
 
         /* Contenedor de cambio de contraseña */
         .change-password-area {
@@ -286,6 +326,59 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
                     block.classList.toggle('active');
                 });
             }
+
+            // --- LÓGICA PARA EDITAR DATOS DE USUARIO ---
+            const btnEdit = document.querySelector('.btn-edit');
+            const btnSave = document.querySelector('.btn-save');
+            const btnCancel = document.querySelector('.btn-cancel');
+            
+            const dataDisplay = document.querySelector('.data-display');
+            const dataEditForm = document.querySelector('.data-edit-form');
+
+            if (btnEdit && dataDisplay && dataEditForm) {
+                // Inputs del formulario
+                const inputNombre = document.getElementById('edit-nombre');
+                const inputEmail = document.getElementById('edit-email');
+                const inputPais = document.getElementById('edit-pais');
+                const inputCiudad = document.getElementById('edit-ciudad');
+                const inputCelular = document.getElementById('edit-celular');
+
+                // Spans de visualización
+                const displayNombre = document.getElementById('display-nombre');
+                const displayEmail = document.getElementById('display-email');
+                const displayPais = document.getElementById('display-pais');
+                const displayCiudad = document.getElementById('display-ciudad');
+                const displayCelular = document.getElementById('display-celular');
+
+                // Al hacer clic en "Editar"
+                btnEdit.addEventListener('click', () => {
+                    dataDisplay.style.display = 'none';
+                    dataEditForm.style.display = 'flex';
+                    btnEdit.style.display = 'none';
+                });
+
+                // Al hacer clic en "Cancelar"
+                btnCancel.addEventListener('click', () => {
+                    dataDisplay.style.display = 'flex';
+                    dataEditForm.style.display = 'none';
+                    btnEdit.style.display = 'inline-block';
+                });
+
+                // Al hacer clic en "Guardar Cambios" (simulación frontend)
+                btnSave.addEventListener('click', () => {
+                    // Actualizar los valores en la vista de solo lectura
+                    displayNombre.textContent = inputNombre.value;
+                    displayEmail.textContent = inputEmail.value;
+                    displayPais.textContent = inputPais.value;
+                    displayCiudad.textContent = inputCiudad.value;
+                    displayCelular.textContent = inputCelular.value;
+
+                    // Volver a la vista de solo lectura
+                    dataDisplay.style.display = 'flex';
+                    dataEditForm.style.display = 'none';
+                    btnEdit.style.display = 'inline-block';
+                });
+            }
         });
     </script>
 </head>
@@ -317,46 +410,65 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
             </div>
             
             <div class="user-data-container">
-                <div class="data-display">
+                <!-- VISTA DE SOLO LECTURA -->
+                <div class="data-display" style="display: flex;">
                     <div class="data-item">
                         <span class="data-label">Nombre:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_nombre); ?></span>
+                        <span class="data-value" id="display-nombre"><?php echo htmlspecialchars($usuario_nombre); ?></span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">Email:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_email); ?></span>
+                        <span class="data-value" id="display-email"><?php echo htmlspecialchars($usuario_email); ?></span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">País:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_pais); ?></span>
+                        <span class="data-value" id="display-pais"><?php echo htmlspecialchars($usuario_pais); ?></span>
                     </div>
                     <div class="data-item">
                         <span class="data-label">Ciudad:</span>
-                        <span class="data-value"><?php echo htmlspecialchars($usuario_ciudad); ?></span>
+                        <span class="data-value" id="display-ciudad"><?php echo htmlspecialchars($usuario_ciudad); ?></span>
                     </div>
                     
                     <div class="data-item">
                         <span class="data-label">Celular:</span>
-                        <span class="data-value">
-                            <?php echo htmlspecialchars($usuario_celular_prefijo . ' ' . $usuario_celular_numero); ?>
+                        <span class="data-value" id="display-celular">
+                            <?php echo htmlspecialchars($usuario_celular_completo); ?>
                         </span>
                     </div>
                 </div>
 
+                <!-- FORMULARIO DE EDICIÓN (OCULTO) -->
+                <form action="actualizar_perfil.php" method="post" class="data-edit-form-perfil">
+                    <div class="data-edit-form">
+                        <input type="text" id="edit-nombre" name="nuevo_nombre" value="<?php echo htmlspecialchars($usuario_nombre); ?>">
+                        <input type="email" id="edit-email" name="nuevo_email" value="<?php echo htmlspecialchars($usuario_email); ?>">
+                        <input type="text" id="edit-pais" name="nuevo_pais" value="<?php echo htmlspecialchars($usuario_pais); ?>">
+                        <input type="text" id="edit-ciudad" name="nueva_ciudad" value="<?php echo htmlspecialchars($usuario_ciudad); ?>">
+                        <input type="text" id="edit-celular" name="nuevo_celular" value="<?php echo htmlspecialchars($usuario_celular_completo); ?>">
+                        
+                        <div class="edit-form-actions">
+                            <button type="submit" class="btn-save btn-edit">Guardar Cambios</button>
+                            <button class="btn-cancel btn-edit">Cancelar</button>
+                        </div>
+                    </div>
+                </form>
+
+                
                 <div class="change-password-area">
                     <div class="change-password-header">
                         <h3>Cambiar Contraseña</h3>
                         <span class="arrow">></span>
                     </div>
                     <div class="change-password-content">
-                        <form action="#" method="post" class="change-password-form">
-                            <input type="password" name="current_password" placeholder="Contraseña Actual">
-                            <input type="password" name="new_password" placeholder="Nueva Contraseña">
-                            <input type="password" name="confirm_new_password" placeholder="Confirmar Nueva Contraseña">
+                        <form action="actualizar_password.php" method="POST" class="change-password-form">
+                            <input type="password" name="current_password" placeholder="Contraseña Actual" required>
+                            <input type="password" name="new_password" placeholder="Nueva Contraseña" required>
+                            <input type="password" name="confirm_new_password" placeholder="Confirmar Nueva Contraseña" required>
                             <button type="submit" class="btn-update-password">Actualizar Contraseña</button>
                         </form>
                     </div>
                 </div>
+            
             </div>
         </div>
         
