@@ -6,7 +6,7 @@ session_start();
 /*$usuario = "holgereduardo777";
 */
 $ruta_perfil="perfil.php";
-$ruta_LandingPage="../LandingPage.php";
+$ruta_salir="../autenticacion/logout.php";
 $ruta_GoT="page_GoT.php";
 $ruta_HotD="page_HotD.php";
 
@@ -230,7 +230,7 @@ $usuario = htmlspecialchars($_SESSION['usuario_nombre']);
     <div class="user-actions">
         <span>Bienvenido, <?= $usuario ?></span>
         <a href="<?php echo $ruta_perfil; ?>" class="btn btn-profile">Mi Perfil</a>
-        <a href="../autenticacion/logout.php" class="btn btn-logout">Salir</a>
+        <a href="<?php $ruta_salir?>" class="btn btn-logout">Salir</a>
     </div>
 </header>
 

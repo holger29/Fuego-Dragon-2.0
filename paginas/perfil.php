@@ -1,15 +1,32 @@
 <?php
-// SIMULACIÓN de variables de sesión para el frontend
-$usuario_nombre = "Daniela María Hurtado";
-$usuario_email = "danielam12@gmail.com";
-$usuario_pais = "Nicaragua";
-$usuario_ciudad = "Managua";
-// DATOS SIMULADOS: Se divide el número en prefijo y número
-$usuario_celular_prefijo = "+505"; // Prefijo de Nicaragua
-$usuario_celular_numero = "35985477"; // Número sin prefijo
+// 1. Iniciar sesión y conectar a la BD
+session_start();
+include("../conexion/conexion.php");
 
-$ruta_dashboard = "dashboard.php";
-$ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
+// 2. Control de acceso
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: ../autenticacion/login.php");
+    exit();
+}
+
+$id_usuario = $_SESSION['usuario_id'];
+
+// 3. Consultar datos reales del usuario
+$sql = "SELECT nombre_completo, email, pais_residencia, ciudad_residencia, celular FROM usuarios WHERE id = ?";
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("i", $id_usuario);
+$stmt->execute();
+$resultado = $stmt->get_result();
+$datos = $resultado->fetch_assoc();
+
+// 4. Variables para el HTML
+$usuario_nombre = $datos['nombre_completo'];
+$usuario_email  = $datos['email'];
+$usuario_pais   = $datos['pais_residencia'];
+$usuario_ciudad = $datos['ciudad_residencia'];
+$usuario_celular_completo = $datos['celular']; // Ejemplo: "+505 35985477"
+
+$ruta_salir = "../autenticacion/logout.php"; // Simula cierre de sesión
 ?>
 
 <!DOCTYPE html>
@@ -375,7 +392,7 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
         <div class="user-actions">
             <span class="user-greeting">Bienvenido, <?php echo htmlspecialchars($usuario_nombre); ?></span>
             <a href="#" class="btn-profile">Mi Perfil</a> 
-            <a href="../autenticacion/logout.php" class="btn-logout">Salir</a>
+            <a href="<?php echo $ruta_salir; ?>" class="btn-logout">Salir</a>
         </div>
     </header>
 
@@ -415,40 +432,43 @@ $ruta_salir = "../LandingPage.php"; // Simula cierre de sesión
                     <div class="data-item">
                         <span class="data-label">Celular:</span>
                         <span class="data-value" id="display-celular">
-                            <?php echo htmlspecialchars($usuario_celular_prefijo . ' ' . $usuario_celular_numero); ?>
+                            <?php echo htmlspecialchars($usuario_celular_completo); ?>
                         </span>
                     </div>
                 </div>
 
                 <!-- FORMULARIO DE EDICIÓN (OCULTO) -->
-                <div class="data-edit-form">
-                    <input type="text" id="edit-nombre" value="<?php echo htmlspecialchars($usuario_nombre); ?>">
-                    <input type="email" id="edit-email" value="<?php echo htmlspecialchars($usuario_email); ?>">
-                    <input type="text" id="edit-pais" value="<?php echo htmlspecialchars($usuario_pais); ?>">
-                    <input type="text" id="edit-ciudad" value="<?php echo htmlspecialchars($usuario_ciudad); ?>">
-                    <input type="text" id="edit-celular" value="<?php echo htmlspecialchars($usuario_celular_prefijo . ' ' . $usuario_celular_numero); ?>">
-                    
-                    <div class="edit-form-actions">
-                        <button class="btn-save btn-edit">Guardar Cambios</button>
-                        <button class="btn-cancel btn-edit">Cancelar</button>
+                <form action="actualizar_perfil.php" method="post" class="data-edit-form-perfil">
+                    <div class="data-edit-form">
+                        <input type="text" id="edit-nombre" name="nuevo_nombre" value="<?php echo htmlspecialchars($usuario_nombre); ?>">
+                        <input type="email" id="edit-email" name="nuevo_email" value="<?php echo htmlspecialchars($usuario_email); ?>">
+                        <input type="text" id="edit-pais" name="nuevo_pais" value="<?php echo htmlspecialchars($usuario_pais); ?>">
+                        <input type="text" id="edit-ciudad" name="nueva_ciudad" value="<?php echo htmlspecialchars($usuario_ciudad); ?>">
+                        <input type="text" id="edit-celular" name="nuevo_celular" value="<?php echo htmlspecialchars($usuario_celular_completo); ?>">
+                        
+                        <div class="edit-form-actions">
+                            <button type="submit" class="btn-save btn-edit">Guardar Cambios</button>
+                            <button class="btn-cancel btn-edit">Cancelar</button>
+                        </div>
                     </div>
-                </div>
+                </form>
 
-
+                
                 <div class="change-password-area">
                     <div class="change-password-header">
                         <h3>Cambiar Contraseña</h3>
                         <span class="arrow">></span>
                     </div>
                     <div class="change-password-content">
-                        <form action="#" method="post" class="change-password-form">
-                            <input type="password" name="current_password" placeholder="Contraseña Actual">
-                            <input type="password" name="new_password" placeholder="Nueva Contraseña">
-                            <input type="password" name="confirm_new_password" placeholder="Confirmar Nueva Contraseña">
+                        <form action="actualizar_password.php" method="POST" class="change-password-form">
+                            <input type="password" name="current_password" placeholder="Contraseña Actual" required>
+                            <input type="password" name="new_password" placeholder="Nueva Contraseña" required>
+                            <input type="password" name="confirm_new_password" placeholder="Confirmar Nueva Contraseña" required>
                             <button type="submit" class="btn-update-password">Actualizar Contraseña</button>
                         </form>
                     </div>
                 </div>
+            
             </div>
         </div>
         
