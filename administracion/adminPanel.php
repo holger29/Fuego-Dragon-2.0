@@ -1,8 +1,17 @@
 <?php
+/*El siguiente campo es para el administrador*/
+session_start();
+
+// Si no existe la sesión de administrador, lo expulsamos al login
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin.php");
+    exit();
+}
+
 // Versión sin conexión a base de datos ni validación de sesión
 // Este código solo incluye la simulación de rutas.
 
-$ruta_salir = "admin.php"; // Simula cierre de sesión o vuelta a una página inicial
+$ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una página inicial
 ?>
 
 <!DOCTYPE html>

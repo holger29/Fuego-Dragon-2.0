@@ -1,3 +1,38 @@
+<?php
+session_start();
+include("../conexion/conexion.php");
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Capturamos los datos del formulario
+    $email_form = $_POST['email'];
+    $pass_form  = $_POST['password'];
+
+    // Consultamos si el email existe en la tabla de administradores
+    $sql = "SELECT id, contrasena FROM administradores WHERE email = ?";
+    $stmt = $conexion->prepare($sql);
+    $stmt->bind_param("s", $email_form);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+
+    if ($admin = $resultado->fetch_assoc()) {
+        // Validamos la contraseña usando password_verify
+        if (password_verify($pass_form, $admin['contrasena'])) {
+            // Si es correcto, creamos la sesión de admin
+            $_SESSION['admin_id'] = $admin['id'];
+            $_SESSION['admin_email'] = $email_form;
+            
+            // Redirección al panel
+            header("Location: adminPanel.php");
+            exit();
+        } else {
+            echo "<script>alert('Contraseña incorrecta');</script>";
+        }
+    } else {
+        echo "<script>alert('Este correo no tiene privilegios de administrador');</script>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -98,7 +133,7 @@
     <div class="login-container">
         <h1>ACCESO DE<br>ADMINISTRADOR</h1>
         
-        <form action="adminPanel.php" method="POST">
+        <form action="" method="POST">
             <input type="email" name="email" placeholder="Email" required value="holgereduardo777@gmail.com">
             <input type="password" name="password" placeholder="Contraseña" required>
             
