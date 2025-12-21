@@ -1,7 +1,7 @@
 <?php
 /*El siguiente campo es para el administrador*/
 session_start();
-include("../conexion/conexion.php");//para incluir la conexión para el feedback
+include("../conexion/conexion.php"); //para incluir la conexión para el feedback
 
 // Si no existe la sesión de administrador, lo expulsamos al login
 if (!isset($_SESSION['admin_id'])) {
@@ -31,6 +31,16 @@ $res_feedback = $conexion->query($sql_feedback);
 // Este código solo incluye la simulación de rutas.
 $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una página inicial
 ?>
+
+<?php
+/**Esta parte le corresponde a adminPanel.php en la seccion
+ * de gestionar usuarios */
+// --- Nueva consulta para Gestionar Usuarios ---
+$sql_usuarios = "SELECT * FROM usuarios ORDER BY id DESC";
+$res_usuarios = $conexion->query($sql_usuarios);
+
+?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -377,7 +387,7 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+       /* document.addEventListener('DOMContentLoaded', function() {
             // Script para manejar TODOS los acordeones
             const accordionHeaders = document.querySelectorAll('.accordion-header');
 
@@ -388,6 +398,53 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
                 });
             });
         });
+        //adminPanel.php (gestionar usuarios)
+        // Función para confirmar eliminación de usuario
+        function confirmarEliminar(id, nombre) {
+            if (confirm("¿Estás seguro de eliminar permanentemente al usuario: " + nombre + "?")) {
+                // Redirige a un archivo que procese el borrado
+                window.location.href = "eliminar_usuario.php?id=" + id;
+            }
+        }*/
+        document.addEventListener('DOMContentLoaded', function() {
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+    // 1. Al cargar la página, revisar si había un acordeón abierto
+    const activeAccordionId = localStorage.getItem('activeAccordion');
+    if (activeAccordionId) {
+        const activeBlock = document.getElementById(activeAccordionId);
+        if (activeBlock) {
+            activeBlock.classList.add('active');
+            // Opcional: Hacer scroll suave hasta el acordeón abierto
+            activeBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    accordionHeaders.forEach((header, index) => {
+        // Asignamos un ID único si no lo tienen para poder identificarlos
+        const block = header.closest('.admin-accordion-block');
+        if (!block.id) block.id = 'accordion-' + index;
+
+        header.addEventListener('click', function() {
+            // Alternar la clase active
+            block.classList.toggle('active');
+
+            // 2. Guardar o borrar el estado en localStorage
+            if (block.classList.contains('active')) {
+                localStorage.setItem('activeAccordion', block.id);
+                
+                // Opcional: Cerrar los demás si quieres que solo uno esté abierto
+                document.querySelectorAll('.admin-accordion-block').forEach(other => {
+                    if (other !== block) {
+                        other.classList.remove('active');
+                    }
+                });
+            } else {
+                localStorage.removeItem('activeAccordion');
+            }
+        });
+    });
+});
     </script>
 </head>
 
@@ -399,7 +456,7 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
 
     <div class="admin-content">
 
-        <div class="admin-accordion-block active">
+        <div class="admin-accordion-block">
             <div class="accordion-header">
                 <h2>GESTIONAR CONTENIDO DE VIDEO</h2>
                 <span class="accordion-arrow">V</span>
@@ -531,72 +588,85 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Fila de ejemplo 1 -->
-                                <tr>
-                                    <td>1</td>
-                                    <td>Jon Nieve</td>
-                                    <td>jon.nieve@thewall.com</td>
-                                    <td>Westeros</td>
-                                    <td>Winterfell</td>
-                                    <td>+01 123456789</td>
-                                    <td>********</td>
-                                    <td>2024-01-15 10:30</td>
-                                    <td>
-                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
-                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
-                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <!-- Fila de ejemplo 2 -->
-                                <tr>
-                                    <td>2</td>
-                                    <td>Daenerys Targaryen</td>
-                                    <td>dany.t@dragonstone.com</td>
-                                    <td>Essos</td>
-                                    <td>Meereen</td>
-                                    <td>+02 987654321</td>
-                                    <td>********</td>
-                                    <td>2024-02-20 14:00</td>
-                                    <td>
-                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
-                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
-                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <!-- Fila de ejemplo 3 -->
-                                <tr>
-                                    <td>3</td>
-                                    <td>Tyrion Lannister</td>
-                                    <td>tyrion.l@casterlyrock.com</td>
-                                    <td>Westeros</td>
-                                    <td>King's Landing</td>
-                                    <td>+03 555555555</td>
-                                    <td>********</td>
-                                    <td>2024-03-10 09:00</td>
-                                    <td>
-                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
-                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
-                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <!-- Fila de ejemplo 4 -->
-                                <tr>
-                                    <td>4</td>
-                                    <td>Holger Edud Angulo Castillo</td>
-                                    <td>holgereduardo777@gmail.com</td>
-                                    <td>Colombia</td>
-                                    <td>Soacha</td>
-                                    <td>+57 3233980456</td>
-                                    <td>********</td>
-                                    <td>2025-09-01 16:00</td>
-                                    <td>
-                                        <button class="action-btn edit" title="Editar Datos"><i class="fa-solid fa-pencil"></i></button>
-                                        <button class="action-btn reset-pass" title="Resetear Contraseña"><i class="fa-solid fa-key"></i></button>
-                                        <button class="action-btn delete" title="Eliminar Usuario"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <!-- NOTA: La columna 'contraseña' no se muestra por seguridad. -->
-                                <!-- Aquí se agregarían más filas de usuarios dinámicamente con PHP -->
+                                <?php
+                                // Detectamos qué acción se quiere realizar
+                                $edit_id = isset($_GET['edit_id']) ? $_GET['edit_id'] : null;
+                                $reset_id = isset($_GET['reset_id']) ? $_GET['reset_id'] : null;
+
+                                if ($res_usuarios && $res_usuarios->num_rows > 0):
+                                    while ($user = $res_usuarios->fetch_assoc()):
+
+                                        // CASO 1: EDITAR DATOS (Lápiz)
+                                        if ($edit_id == $user['id']):
+                                ?>
+                                            <form method="POST" action="actualizar_usuario.php">
+                                                <input type="hidden" name="id" value="<?= $user['id'] ?>">
+                                                <tr>
+                                                    <td><?= $user['id'] ?></td>
+                                                    <td><input type="text" name="nombre_completo" value="<?= htmlspecialchars($user['nombre_completo']) ?>" style="width:100%;"></td>
+                                                    <td><input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" style="width:100%;"></td>
+                                                    <td><input type="text" name="pais_residencia" value="<?= htmlspecialchars($user['pais_residencia']) ?>" style="width:80%;"></td>
+                                                    <td><input type="text" name="ciudad_residencia" value="<?= htmlspecialchars($user['ciudad_residencia']) ?>" style="width:80%;"></td>
+                                                    <td><input type="text" name="celular" value="<?= htmlspecialchars($user['celular']) ?>" style="width:100%;"></td>
+                                                    <td>********</td>
+                                                    <td>--</td>
+                                                    <td>
+                                                        <button type="submit" class="action-btn preview" title="Guardar" style="background-color: #28a745;"><i class="fa-solid fa-save"></i></button>
+                                                        <a href="adminPanel.php" class="action-btn delete" title="Cancelar"><i class="fa-solid fa-xmark"></i></a>
+                                                    </td>
+                                                </tr>
+                                            </form>
+
+                                        <?php
+                                        // CASO 2: RESTABLECER CONTRASEÑA (Llave)
+                                        elseif ($reset_id == $user['id']):
+                                        ?>
+                                            <form method="POST" action="actualizar_password.php">
+                                                <input type="hidden" name="id" value="<?= $user['id'] ?>">
+                                                <tr>
+                                                    <td><?= $user['id'] ?></td>
+                                                    <td colspan="5">
+                                                        <input type="password" name="nueva_password" placeholder="Escribe la nueva contraseña para <?= htmlspecialchars($user['nombre_completo']) ?>" style="width:100%; padding: 5px;" required minlength="6">
+                                                    </td>
+                                                    <td><small style="color: #ffc107;">Nueva Clave</small></td>
+                                                    <td>--</td>
+                                                    <td>
+                                                        <button type="submit" class="action-btn preview" title="Actualizar Clave" style="background-color: #28a745;"><i class="fa-solid fa-key"></i></button>
+                                                        <a href="adminPanel.php" class="action-btn delete" title="Cancelar"><i class="fa-solid fa-xmark"></i></a>
+                                                    </td>
+                                                </tr>
+                                            </form>
+
+                                        <?php
+                                        // CASO 3: VISTA NORMAL
+                                        else:
+                                        ?>
+                                            <tr>
+                                                <td><?= $user['id'] ?></td>
+                                                <td><?= htmlspecialchars($user['nombre_completo']) ?></td>
+                                                <td><?= htmlspecialchars($user['email']) ?></td>
+                                                <td><?= htmlspecialchars($user['pais_residencia']) ?></td>
+                                                <td><?= htmlspecialchars($user['ciudad_residencia']) ?></td>
+                                                <td><?= htmlspecialchars($user['codigo_celular'] . " " . $user['celular']) ?></td>
+                                                <td>********</td>
+                                                <td>2025-12-21</td>
+                                                <td>
+                                                    <a href="adminPanel.php?edit_id=<?= $user['id'] ?>" class="action-btn edit" title="Editar"><i class="fa-solid fa-pencil"></i></a>
+
+                                                    <a href="adminPanel.php?reset_id=<?= $user['id'] ?>" class="action-btn reset-pass" title="Resetear Contraseña" style="text-decoration:none; color:inherit;">
+                                                        <i class="fa-solid fa-key"></i>
+                                                    </a>
+
+                                                    <button class="action-btn delete" onclick="confirmarEliminar(<?= $user['id'] ?>, '<?= $user['nombre_completo'] ?>')">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                <?php
+                                        endif;
+                                    endwhile;
+                                endif;
+                                ?>
                             </tbody>
                         </table>
                     </div>
@@ -604,56 +674,56 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             </div>
         </div>
 
-<div class="admin-accordion-block"> 
-    <div class="accordion-header">
-        <h2>COMENTARIOS DE USUARIOS</h2>
-        <span class="accordion-arrow">V</span>
-    </div>
+        <div class="admin-accordion-block">
+            <div class="accordion-header">
+                <h2>COMENTARIOS DE USUARIOS</h2>
+                <span class="accordion-arrow">V</span>
+            </div>
 
-    <div class="accordion-content">
-        <?php if ($res_feedback && $res_feedback->num_rows > 0): ?>
-            <?php while ($row = $res_feedback->fetch_assoc()): ?>
-                
-                <div class="feedback-item" style="<?php echo ($row['leido'] == 1) ? 'opacity: 0.5;' : 'border-left: 5px solid #a30000;'; ?>; margin-bottom: 15px; padding: 10px; background: #1e2630; border-radius: 5px;">
-                    
-                    <div class="feedback-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div class="user-info">
-                            <span class="feedback-user" style="font-weight: bold; color: #fff;">
-                                <?php echo htmlspecialchars($row['nombre_completo']); ?>
-                                <?php if($row['leido'] == 1): ?> <small style="color: #28a745;">(Leído)</small> <?php endif; ?>
-                            </span>
-                            <br>
-                            <small>
-                                <a href="mailto:<?php echo htmlspecialchars($row['email']); ?>" style="color: #8fa0b5; text-decoration: none;">
-                                    <i class="fa-solid fa-envelope"></i> <?php echo htmlspecialchars($row['email']); ?>
-                                </a>
-                            </small>
+            <div class="accordion-content">
+                <?php if ($res_feedback && $res_feedback->num_rows > 0): ?>
+                    <?php while ($row = $res_feedback->fetch_assoc()): ?>
+
+                        <div class="feedback-item" style="<?php echo ($row['leido'] == 1) ? 'opacity: 0.5;' : 'border-left: 5px solid #a30000;'; ?>; margin-bottom: 15px; padding: 10px; background: #1e2630; border-radius: 5px;">
+
+                            <div class="feedback-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div class="user-info">
+                                    <span class="feedback-user" style="font-weight: bold; color: #fff;">
+                                        <?php echo htmlspecialchars($row['nombre_completo']); ?>
+                                        <?php if ($row['leido'] == 1): ?> <small style="color: #28a745;">(Leído)</small> <?php endif; ?>
+                                    </span>
+                                    <br>
+                                    <small>
+                                        <a href="mailto:<?php echo htmlspecialchars($row['email']); ?>" style="color: #8fa0b5; text-decoration: none;">
+                                            <i class="fa-solid fa-envelope"></i> <?php echo htmlspecialchars($row['email']); ?>
+                                        </a>
+                                    </small>
+                                </div>
+                                <span class="feedback-date" style="font-size: 0.85em; color: #666;">
+                                    <?php echo $row['fecha_envio']; ?>
+                                </span>
+                            </div>
+
+                            <div class="feedback-body" style="margin-top: 10px; color: #ddd;">
+                                <p><?php echo nl2br(htmlspecialchars($row['mensaje'])); ?></p>
+                            </div>
+
+                            <?php if ($row['leido'] == 0): ?>
+                                <form method="POST" style="margin-top: 10px;">
+                                    <input type="hidden" name="id_feedback" value="<?php echo $row['id']; ?>">
+                                    <button type="submit" name="marcar_leido" class="action-btn preview" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
+                                        <i class="fa-solid fa-check"></i> Marcar como leído
+                                    </button>
+                                </form>
+                            <?php endif; ?>
                         </div>
-                        <span class="feedback-date" style="font-size: 0.85em; color: #666;">
-                            <?php echo $row['fecha_envio']; ?>
-                        </span>
-                    </div>
 
-                    <div class="feedback-body" style="margin-top: 10px; color: #ddd;">
-                        <p><?php echo nl2br(htmlspecialchars($row['mensaje'])); ?></p>
-                    </div>
-
-                    <?php if($row['leido'] == 0): ?>
-                        <form method="POST" style="margin-top: 10px;">
-                            <input type="hidden" name="id_feedback" value="<?php echo $row['id']; ?>">
-                            <button type="submit" name="marcar_leido" class="action-btn preview" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
-                                <i class="fa-solid fa-check"></i> Marcar como leído
-                            </button>
-                        </form>
-                    <?php endif; ?>
-                </div>
-
-            <?php endwhile; ?>
-        <?php else: ?>
-            <p style="padding: 20px; text-align: center;">No hay feedback registrado.</p>
-        <?php endif; ?>
-    </div>
-</div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p style="padding: 20px; text-align: center;">No hay feedback registrado.</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </body>
 
