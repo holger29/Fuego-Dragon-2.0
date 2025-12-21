@@ -1,43 +1,64 @@
 <?php
 /*El siguiente campo es para el administrador*/
 session_start();
+include("../conexion/conexion.php");//para incluir la conexión para el feedback
 
 // Si no existe la sesión de administrador, lo expulsamos al login
 if (!isset($_SESSION['admin_id'])) {
     header("Location: admin.php");
     exit();
 }
+// Consulta para obtener los comentarios uniendo la tabla feedback con usuarios
+// 1. Procesar la marcación como leído si se recibe el ID por POST
+if (isset($_POST['marcar_leido'])) {
+    $id_feedback = $_POST['id_feedback'];
+    // Actualizamos el campo 'leido' a 1 para ese ID específico
+    $sql_update = "UPDATE feedback SET leido = 1 WHERE id = ?";
+    $stmt_upd = $conexion->prepare($sql_update);
+    $stmt_upd->bind_param("i", $id_feedback);
+    $stmt_upd->execute();
+}
+
+// 2. Consulta mejorada: seleccionamos el ID y el estado 'leido'
+$sql_feedback = "SELECT f.id, f.mensaje, f.fecha_envio, f.leido, u.nombre_completo, u.email 
+                 FROM feedback f 
+                 INNER JOIN usuarios u ON f.usuario_id = u.id 
+                 ORDER BY f.leido ASC, f.fecha_envio DESC"; // Primero los NO leídos, luego por fecha
+//Ejecutamos la consulta con la variable $conexion (ya definida por el include)
+$res_feedback = $conexion->query($sql_feedback);
 
 // Versión sin conexión a base de datos ni validación de sesión
 // Este código solo incluye la simulación de rutas.
-
 $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una página inicial
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administrador | Fuego Dragón</title>
-    
+
     <link rel="icon" type="image/png" href="activos/img/favicon_fd.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="../activos/css/style.css"> 
+    <link rel="stylesheet" href="../activos/css/style.css">
     <link rel="icon" type="image/png" href="../activos/img/favicon_fd.png">
-    
+
     <style>
         /* Estilos generales */
-        html, body {
-            height: 100%; 
+        html,
+        body {
+            height: 100%;
             margin: 0;
             padding: 0;
         }
+
         body {
-            background-color: #121417; 
+            background-color: #121417;
             color: #f4f4f4;
             font-family: Arial, sans-serif;
-            overflow-y: scroll; 
+            overflow-y: scroll;
         }
 
         /* HEADER del Admin */
@@ -49,12 +70,14 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             background-color: #1a1a1a;
             border-bottom: 2px solid #a30000;
         }
+
         .admin-header h1 {
             margin: 0;
             color: #f4f4f4;
             font-size: 2em;
             font-weight: bold;
         }
+
         .btn-salir {
             padding: 8px 15px;
             border: none;
@@ -66,25 +89,26 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             cursor: pointer;
             transition: opacity 0.3s;
         }
-        
+
         /* Contenido Principal y Estilo de Acordeón */
         .admin-content {
             max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
-        
+
         /* Contenedores de Acordeón (Panel principal) */
         .admin-accordion-block {
-            background-color: #1f2a38; 
+            background-color: #1f2a38;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
+
         .accordion-header {
             padding: 20px 25px;
-            background-color: #2b394d; 
+            background-color: #2b394d;
             border-bottom: 1px solid #333;
             cursor: pointer;
             display: flex;
@@ -92,23 +116,28 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             align-items: center;
             transition: background-color 0.3s;
         }
+
         .accordion-header:hover {
             background-color: #334255;
         }
+
         .accordion-header h2 {
             color: #f4f4f4;
             font-size: 1.4em;
             margin: 0;
             font-weight: normal;
         }
+
         .accordion-arrow {
             font-size: 1.5em;
             transition: transform 0.3s;
             color: #8fa0b5;
         }
+
         .admin-accordion-block.active .accordion-arrow {
             transform: rotate(180deg);
         }
+
         .accordion-content {
             max-height: 0;
             overflow: hidden;
@@ -116,8 +145,10 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             padding: 0 25px;
             color: #ccc;
         }
+
         .admin-accordion-block.active .accordion-content {
-            max-height: 10000px; /* Aumentado para asegurar que todo el contenido sea visible */
+            max-height: 10000px;
+            /* Aumentado para asegurar que todo el contenido sea visible */
             padding-top: 20px;
             padding-bottom: 20px;
         }
@@ -126,17 +157,20 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
         .season-accordion-block.active .season-accordion-arrow {
             transform: rotate(180deg);
         }
+
         .season-accordion-content {
-            display: none; /* Oculto por defecto, se muestra con JS */
+            display: none;
+            /* Oculto por defecto, se muestra con JS */
         }
-        
+
         /* ESTRUCTURA ESPECÍFICA DE GESTIONAR CONTENIDO */
         .content-management-area {
             background-color: #121417;
             padding: 20px;
             border-radius: 6px;
-            overflow-y:auto;
+            overflow-y: auto;
         }
+
         .upload-info {
             font-style: italic;
             color: #a30000;
@@ -144,19 +178,21 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             border-bottom: 1px dashed #333;
             padding-bottom: 15px;
         }
-        
+
         /* Listado de Temporadas */
         .saga-list {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
+
         .series-block {
             background-color: #1f2a38;
             border: 1px solid #3a4b63;
             border-radius: 6px;
             padding: 20px;
         }
+
         .series-title {
             font-size: 1.5em;
             color: #a30000;
@@ -164,6 +200,7 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             padding-bottom: 10px;
             border-bottom: 1px solid #3a4b63;
         }
+
         .season-accordion-block {
             margin-bottom: 15px;
         }
@@ -174,37 +211,47 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             margin: 0;
             background-color: #2b394d;
         }
+
         .episode-item {
             display: grid;
-            grid-template-columns: 5fr 1fr 0.5fr 0.5fr; /* Nombre, Estado, Ver, Acciones */
+            grid-template-columns: 5fr 1fr 0.5fr 0.5fr;
+            /* Nombre, Estado, Ver, Acciones */
             align-items: center;
             padding: 10px 15px;
             border-bottom: 1px solid #333;
             gap: 15px;
         }
+
         .episode-item:last-child {
             border-bottom: none;
         }
+
         .episode-name {
             color: #ccc;
         }
+
         .episode-status {
             text-align: center;
             font-size: 0.9em;
             font-weight: bold;
         }
+
         .status-disponible {
-            color: #28a745; /* Verde */
+            color: #28a745;
+            /* Verde */
         }
+
         .status-pendiente {
-            color: #ffc107; /* Amarillo */
+            color: #ffc107;
+            /* Amarillo */
         }
+
         .episode-actions {
             display: flex;
             gap: 10px;
             justify-content: center;
         }
-        
+
         /* Botones de Acción (Subir, Borrar, Previsualizar) */
         .action-btn {
             padding: 5px 10px;
@@ -214,18 +261,25 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             font-size: 0.8em;
             height: 30px;
         }
+
         .action-btn.preview {
-            background-color: #007bff; /* Azul para el ojo */
+            background-color: #007bff;
+            /* Azul para el ojo */
             color: white;
         }
+
         .action-btn.upload {
-            background-color: #5a7493; /* Gris/Azul para subir */
+            background-color: #5a7493;
+            /* Gris/Azul para subir */
             color: white;
         }
+
         .action-btn.delete {
-            background-color: #dc3545; /* Rojo para borrar */
+            background-color: #dc3545;
+            /* Rojo para borrar */
             color: white;
         }
+
         .action-btn:hover {
             opacity: 0.8;
         }
@@ -238,6 +292,7 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             padding: 15px 20px;
             margin-bottom: 15px;
         }
+
         .feedback-header {
             display: flex;
             justify-content: space-between;
@@ -246,50 +301,76 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             padding-bottom: 10px;
             border-bottom: 1px solid #3a4b63;
             font-size: 0.9em;
-            flex-wrap: wrap; /* Para que se ajuste en pantallas pequeñas */
+            flex-wrap: wrap;
+            /* Para que se ajuste en pantallas pequeñas */
         }
-        .feedback-user { font-weight: bold; color: #f4f4f4; }
-        .feedback-date { color: #8fa0b5; }
-        .feedback-body p { margin: 0; line-height: 1.6; color: #ccc; }
+
+        .feedback-user {
+            font-weight: bold;
+            color: #f4f4f4;
+        }
+
+        .feedback-date {
+            color: #8fa0b5;
+        }
+
+        .feedback-body p {
+            margin: 0;
+            line-height: 1.6;
+            color: #ccc;
+        }
 
 
         /* --- ESTILOS RESPONSIVE --- */
         @media (max-width: 768px) {
-            .content-management-area{
-                padding:5px;
+            .content-management-area {
+                padding: 5px;
             }
+
             .admin-header {
                 padding: 10px;
-                padding: 15px 10px; /* Reducido padding horizontal */
+                padding: 15px 10px;
+                /* Reducido padding horizontal */
             }
+
             .admin-header h1 {
                 font-size: 1.5em;
             }
+
             .accordion-header {
                 padding: 3px;
-                padding: 15px 10px; /* Reducido padding horizontal */
+                padding: 15px 10px;
+                /* Reducido padding horizontal */
             }
+
             .admin-accordion-block.active .accordion-content {
                 padding-top: 20px;
                 padding-bottom: 20px;
-                padding-left: 10px; 
+                padding-left: 10px;
                 padding-right: 10px;
-                overflow-y:auto;
+                overflow-y: auto;
             }
+
             .admin-content {
                 margin: 10px auto;
-                padding: 0 2px; /* Reducido padding horizontal del contenedor principal */
+                padding: 0 2px;
+                /* Reducido padding horizontal del contenedor principal */
             }
+
             .episode-item {
-                grid-template-columns: 1fr; /* Apila los elementos */
+                grid-template-columns: 1fr;
+                /* Apila los elementos */
                 text-align: center;
             }
+
             .episode-name {
                 margin-bottom: 10px;
             }
+
             .episode-status {
                 margin-bottom: 10px;
             }
+
             .episode-actions {
                 justify-content: center;
             }
@@ -299,7 +380,7 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
         document.addEventListener('DOMContentLoaded', function() {
             // Script para manejar TODOS los acordeones
             const accordionHeaders = document.querySelectorAll('.accordion-header');
-            
+
             accordionHeaders.forEach(header => {
                 header.addEventListener('click', function() {
                     const block = this.closest('.admin-accordion-block');
@@ -309,6 +390,7 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
         });
     </script>
 </head>
+
 <body>
     <header class="admin-header">
         <h1>PANEL DE ADMINISTRADOR</h1>
@@ -327,90 +409,91 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
                     <p class="upload-info">
                         Si ves un video como "Disponible" pero la carpeta de Storage está vacía, es un registro antiguo. Puedes usar el botón de **subir** (gris/azul) para reemplazarlo.
                     </p>
-                    
+
                     <div class="saga-list">
-                        
+
                         <div class="series-block">
                             <h3 class="series-title">GAME OF THRONES</h3>
-                            
-                            <?php 
-                                // Función auxiliar para generar las listas de episodios (solo frontend)
-                                function generate_episodes($season, $count, $available_until = 0) {
-                                    $html = '';
-                                    for ($i = 1; $i <= $count; $i++) {
-                                        $is_available = ($i <= $available_until);
-                                        $status_class = $is_available ? 'disponible' : 'pendiente';
-                                        $status_text = $is_available ? 'Disponible' : 'Pendiente';
 
-                                        $html .= '<div class="episode-item">';
-                                        $html .= '<span class="episode-name">Episodio ' . $i . ': Capítulo ' . $i . ' (.mp4)</span>';
-                                        $html .= '<span class="episode-status status-' . $status_class . '">' . $status_text . '</span>';
-                                        
-                                        // Botones de Acción
-                                        $html .= '<span class="episode-actions">';
-                                        if ($is_available) {
-                                            $html .= '<button class="action-btn preview" title="Previsualizar"><i class="fa-solid fa-eye"></i></button>';
-                                        }
-                                        $html .= '<button class="action-btn upload" title="Subir/Reemplazar"><i class="fa-solid fa-upload"></i></button>';
-                                        $html .= '<button class="action-btn delete" title="Borrar"><i class="fa-solid fa-trash"></i></button>';
-                                        $html .= '</span>';
-                                        $html .= '</div>';
+                            <?php
+                            // Función auxiliar para generar las listas de episodios (solo frontend)
+                            function generate_episodes($season, $count, $available_until = 0)
+                            {
+                                $html = '';
+                                for ($i = 1; $i <= $count; $i++) {
+                                    $is_available = ($i <= $available_until);
+                                    $status_class = $is_available ? 'disponible' : 'pendiente';
+                                    $status_text = $is_available ? 'Disponible' : 'Pendiente';
+
+                                    $html .= '<div class="episode-item">';
+                                    $html .= '<span class="episode-name">Episodio ' . $i . ': Capítulo ' . $i . ' (.mp4)</span>';
+                                    $html .= '<span class="episode-status status-' . $status_class . '">' . $status_text . '</span>';
+
+                                    // Botones de Acción
+                                    $html .= '<span class="episode-actions">';
+                                    if ($is_available) {
+                                        $html .= '<button class="action-btn preview" title="Previsualizar"><i class="fa-solid fa-eye"></i></button>';
                                     }
-                                    return $html;
+                                    $html .= '<button class="action-btn upload" title="Subir/Reemplazar"><i class="fa-solid fa-upload"></i></button>';
+                                    $html .= '<button class="action-btn delete" title="Borrar"><i class="fa-solid fa-trash"></i></button>';
+                                    $html .= '</span>';
+                                    $html .= '</div>';
                                 }
+                                return $html;
+                            }
 
-                                // Definición de Temporadas y Episodios
-                                $go_t_seasons = [
-                                    1 => 10, // T1: 10 episodios
-                                    2 => 10,
-                                    3 => 10,
-                                    4 => 10,
-                                    5 => 10,
-                                    6 => 10,
-                                    7 => 7,  // T7: 7 episodios
-                                    8 => 6   // T8: 6 episodios
-                                ];
+                            // Definición de Temporadas y Episodios
+                            $go_t_seasons = [
+                                1 => 10, // T1: 10 episodios
+                                2 => 10,
+                                3 => 10,
+                                4 => 10,
+                                5 => 10,
+                                6 => 10,
+                                7 => 7,  // T7: 7 episodios
+                                8 => 6   // T8: 6 episodios
+                            ];
 
-                                // Generar las 8 temporadas
-                                foreach ($go_t_seasons as $season => $episodes_count) {
-                                    // Simulamos que T1 está disponible y las demás no
-                                    $available_count = ($season == 1) ? $episodes_count : 0; 
+                            // Generar las 8 temporadas
+                            foreach ($go_t_seasons as $season => $episodes_count) {
+                                // Simulamos que T1 está disponible y las demás no
+                                $available_count = ($season == 1) ? $episodes_count : 0;
 
-                                    // Usamos la misma estructura de acordeón principal para las temporadas
-                                    echo '<div class="admin-accordion-block">'; // Bloque de acordeón para la temporada
-                                    echo '<div class="accordion-header">';
-                                    echo '<h2>Temporada ' . $season . '</h2>';
-                                    echo '<span class="accordion-arrow">V</span>';
-                                    echo '</div>';
-                                    echo '<div class="accordion-content episode-list">'; // El contenido es la lista de episodios
-                                    echo generate_episodes($season, $episodes_count, $available_count);
-                                    echo '</div>';
-                                    echo '</div>';
-                                }
+                                // Usamos la misma estructura de acordeón principal para las temporadas
+                                echo '<div class="admin-accordion-block">'; // Bloque de acordeón para la temporada
+                                echo '<div class="accordion-header">';
+                                echo '<h2>Temporada ' . $season . '</h2>';
+                                echo '<span class="accordion-arrow">V</span>';
+                                echo '</div>';
+                                echo '<div class="accordion-content episode-list">'; // El contenido es la lista de episodios
+                                echo generate_episodes($season, $episodes_count, $available_count);
+                                echo '</div>';
+                                echo '</div>';
+                            }
                             ?>
                         </div>
-                        
+
                         <div class="series-block">
                             <h3 class="series-title">HOUSE OF THE DRAGON</h3>
-                            <?php 
-                                // HotD (Simulamos 1 temporada con 10 episodios, 3 disponibles)
-                                $hotd_episodes = 10;
-                                $hotd_available = 3; 
+                            <?php
+                            // HotD (Simulamos 1 temporada con 10 episodios, 3 disponibles)
+                            $hotd_episodes = 10;
+                            $hotd_available = 3;
 
-                                echo '<div class="admin-accordion-block">';
-                                echo '<div class="accordion-header"><h2>Temporada 1</h2><span class="accordion-arrow">V</span></div>';
-                                echo '<div class="accordion-content episode-list">';
-                                echo generate_episodes(1, $hotd_episodes, $hotd_available);
-                                echo '</div>';
-                                echo '</div>';
+                            echo '<div class="admin-accordion-block">';
+                            echo '<div class="accordion-header"><h2>Temporada 1</h2><span class="accordion-arrow">V</span></div>';
+                            echo '<div class="accordion-content episode-list">';
+                            echo generate_episodes(1, $hotd_episodes, $hotd_available);
+                            echo '</div>';
+                            echo '</div>';
                             ?>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="admin-accordion-block">
             <div class="accordion-header">
                 <h2>GESTIONAR USUARIOS</h2>
@@ -521,26 +604,57 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
             </div>
         </div>
 
-        <div class="admin-accordion-block">
-            <div class="accordion-header">
-                <h2>COMENTARIOS DE USUARIOS</h2>
-                <span class="accordion-arrow">V</span>
-            </div>
-            <div class="accordion-content">
-                <div class="content-area">
-                    <!-- Simulación de un comentario de usuario -->
-                    <div class="feedback-item">
-                        <div class="feedback-header">
-                            <span class="feedback-user">Jon Nieve (jon.nieve@thewall.com)</span>
-                            <span class="feedback-date">2024-05-21 15:45</span>
+<div class="admin-accordion-block"> 
+    <div class="accordion-header">
+        <h2>COMENTARIOS DE USUARIOS</h2>
+        <span class="accordion-arrow">V</span>
+    </div>
+
+    <div class="accordion-content">
+        <?php if ($res_feedback && $res_feedback->num_rows > 0): ?>
+            <?php while ($row = $res_feedback->fetch_assoc()): ?>
+                
+                <div class="feedback-item" style="<?php echo ($row['leido'] == 1) ? 'opacity: 0.5;' : 'border-left: 5px solid #a30000;'; ?>; margin-bottom: 15px; padding: 10px; background: #1e2630; border-radius: 5px;">
+                    
+                    <div class="feedback-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div class="user-info">
+                            <span class="feedback-user" style="font-weight: bold; color: #fff;">
+                                <?php echo htmlspecialchars($row['nombre_completo']); ?>
+                                <?php if($row['leido'] == 1): ?> <small style="color: #28a745;">(Leído)</small> <?php endif; ?>
+                            </span>
+                            <br>
+                            <small>
+                                <a href="mailto:<?php echo htmlspecialchars($row['email']); ?>" style="color: #8fa0b5; text-decoration: none;">
+                                    <i class="fa-solid fa-envelope"></i> <?php echo htmlspecialchars($row['email']); ?>
+                                </a>
+                            </small>
                         </div>
-                        <div class="feedback-body">
-                            <p>Sería genial si pudieran añadir subtítulos en Dothraki para la primera temporada de Game of Thrones. Por lo demás, la plataforma es excelente. ¡Gracias!</p>
-                        </div>
+                        <span class="feedback-date" style="font-size: 0.85em; color: #666;">
+                            <?php echo $row['fecha_envio']; ?>
+                        </span>
                     </div>
+
+                    <div class="feedback-body" style="margin-top: 10px; color: #ddd;">
+                        <p><?php echo nl2br(htmlspecialchars($row['mensaje'])); ?></p>
+                    </div>
+
+                    <?php if($row['leido'] == 0): ?>
+                        <form method="POST" style="margin-top: 10px;">
+                            <input type="hidden" name="id_feedback" value="<?php echo $row['id']; ?>">
+                            <button type="submit" name="marcar_leido" class="action-btn preview" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
+                                <i class="fa-solid fa-check"></i> Marcar como leído
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </div>
-            </div>
-        </div>
+
+            <?php endwhile; ?>
+        <?php else: ?>
+            <p style="padding: 20px; text-align: center;">No hay feedback registrado.</p>
+        <?php endif; ?>
+    </div>
+</div>
     </div>
 </body>
+
 </html>

@@ -228,7 +228,7 @@ $usuario = htmlspecialchars($_SESSION['usuario_nombre']);
         <h1>FUEGO DRAGÓN</h1>
     </a>
     <div class="user-actions">
-        <span>Bienvenido, <?= $usuario ?></span>
+        <span>Bienvenid@, <?= $usuario ?></span>
         <a href="<?php echo $ruta_perfil; ?>" class="btn btn-profile">Mi Perfil</a>
         <a href="<?php $ruta_salir?>" class="btn btn-logout">Salir</a>
     </div>

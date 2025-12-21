@@ -448,7 +448,8 @@ $ruta_salir = "../autenticacion/logout.php"; // Simula cierre de sesión
                         
                         <div class="edit-form-actions">
                             <button type="submit" class="btn-save btn-edit">Guardar Cambios</button>
-                            <button class="btn-cancel btn-edit">Cancelar</button>
+                            <!--<button class="btn-cancel btn-edit">Cancelar</button> --> <!--se cambia el btn para que este no haga nada-->
+                            <button type="button" class="btn-cancel btn-edit">Cancelar</button>
                         </div>
                     </div>
                 </form>
@@ -498,10 +499,10 @@ $ruta_salir = "../autenticacion/logout.php"; // Simula cierre de sesión
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
-                <form action="#" method="post" class="feedback-form">
-                    <textarea rows="5" placeholder="Cuéntanos tu experiencia o qué podemos mejorar..."></textarea>
+                <form action="enviar_feedback.php" method="post" class="feedback-form">
+                    <textarea name="comentario" rows="5" placeholder="Cuéntanos tu experiencia..." required></textarea>
                     <button type="submit" class="btn-submit">Enviar Feedback</button>
-                </form>
+                 </form>
             </div>
         </div>
 
