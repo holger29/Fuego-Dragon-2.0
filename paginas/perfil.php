@@ -26,7 +26,8 @@ $usuario_pais   = $datos['pais_residencia'];
 $usuario_ciudad = $datos['ciudad_residencia'];
 $usuario_celular_completo = $datos['celular']; // Ejemplo: "+505 35985477"
 
-$ruta_salir = "../autenticacion/logout.php"; // Simula cierre de sesión
+$ruta_salir = "../autenticacion/logout.php"; // cierre de sesión
+$ruta_dashboard="dashboard.php";
 ?>
 
 <!DOCTYPE html>

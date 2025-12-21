@@ -35,8 +35,17 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
 <?php
 /**Esta parte le corresponde a adminPanel.php en la seccion
  * de gestionar usuarios */
-// --- Nueva consulta para Gestionar Usuarios ---
-$sql_usuarios = "SELECT * FROM usuarios ORDER BY id DESC";
+// --- VARIABLES DE ESTADO Y BÚSQUEDA ---
+$edit_id = $_GET['edit_id'] ?? null;
+$reset_id = $_GET['reset_id'] ?? null;
+$status = $_GET['status'] ?? null;
+$search = $_GET['search'] ?? ''; 
+
+// Clases automáticas para que los acordeones se mantengan abiertos según la acción
+$clase_usuarios = ($edit_id || $reset_id || $status || !empty($search)) ? 'active' : '';
+
+// 3. Consulta Usuarios con BUSCADOR MULTICRITERIO
+$sql_usuarios = "SELECT * FROM usuarios WHERE id LIKE '%$search%' OR nombre_completo LIKE '%$search%' OR email LIKE '%$search%' OR pais_residencia LIKE '%$search%' OR ciudad_residencia LIKE '%$search%' OR celular LIKE '%$search%' ORDER BY id DESC";
 $res_usuarios = $conexion->query($sql_usuarios);
 
 ?>
@@ -387,7 +396,7 @@ $res_usuarios = $conexion->query($sql_usuarios);
         }
     </style>
     <script>
-       /* document.addEventListener('DOMContentLoaded', function() {
+       /*document.addEventListener('DOMContentLoaded', function() {
             // Script para manejar TODOS los acordeones
             const accordionHeaders = document.querySelectorAll('.accordion-header');
 
@@ -397,7 +406,7 @@ $res_usuarios = $conexion->query($sql_usuarios);
                     block.classList.toggle('active');
                 });
             });
-        });
+        });*/
         //adminPanel.php (gestionar usuarios)
         // Función para confirmar eliminación de usuario
         function confirmarEliminar(id, nombre) {
@@ -405,7 +414,7 @@ $res_usuarios = $conexion->query($sql_usuarios);
                 // Redirige a un archivo que procese el borrado
                 window.location.href = "eliminar_usuario.php?id=" + id;
             }
-        }*/
+        }
         document.addEventListener('DOMContentLoaded', function() {
     const accordionHeaders = document.querySelectorAll('.accordion-header');
 
@@ -551,125 +560,78 @@ $res_usuarios = $conexion->query($sql_usuarios);
             </div>
         </div>
 
-        <div class="admin-accordion-block">
+        <div class="admin-accordion-block <?php echo $clase_usuarios; ?>" id="acc-usuarios">
             <div class="accordion-header">
                 <h2>GESTIONAR USUARIOS</h2>
                 <span class="accordion-arrow">V</span>
             </div>
             <div class="accordion-content">
-                <div class="content-area">
-                    <!-- Barra de búsqueda -->
-                    <div class="search-bar">
-                        <input type="search" id="userSearch" placeholder="Buscar por ID, nombre, correo, país...">
-                        <button type="button">Buscar</button>
-                    </div>
+                <form method="GET" class="search-bar">
+                    <input type="search" name="search" placeholder="Buscar por ID, nombre, email, país, ciudad o celular..." value="<?= htmlspecialchars($search) ?>">
+                    <button type="submit" class="action-btn edit">Buscar</button>
+                </form>
 
-                    <!-- Botón para Guardar Cambios -->
-                    <div class="table-actions-bar">
-                        <button type="button" id="saveAllUsers" class="btn-save-all">
-                            <i class="fa-solid fa-save"></i> Guardar Todos los Cambios
-                        </button>
-                    </div>
-
-                    <!-- Tabla de Usuarios -->
-                    <div style="overflow-x:auto;">
-                        <table class="users-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>País</th>
-                                    <th>Ciudad</th>
-                                    <th>Celular</th>
-                                    <th>Contraseña</th>
-                                    <th>Fecha Registro</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Detectamos qué acción se quiere realizar
-                                $edit_id = isset($_GET['edit_id']) ? $_GET['edit_id'] : null;
-                                $reset_id = isset($_GET['reset_id']) ? $_GET['reset_id'] : null;
-
-                                if ($res_usuarios && $res_usuarios->num_rows > 0):
-                                    while ($user = $res_usuarios->fetch_assoc()):
-
-                                        // CASO 1: EDITAR DATOS (Lápiz)
-                                        if ($edit_id == $user['id']):
-                                ?>
-                                            <form method="POST" action="actualizar_usuario.php">
-                                                <input type="hidden" name="id" value="<?= $user['id'] ?>">
-                                                <tr>
-                                                    <td><?= $user['id'] ?></td>
-                                                    <td><input type="text" name="nombre_completo" value="<?= htmlspecialchars($user['nombre_completo']) ?>" style="width:100%;"></td>
-                                                    <td><input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" style="width:100%;"></td>
-                                                    <td><input type="text" name="pais_residencia" value="<?= htmlspecialchars($user['pais_residencia']) ?>" style="width:80%;"></td>
-                                                    <td><input type="text" name="ciudad_residencia" value="<?= htmlspecialchars($user['ciudad_residencia']) ?>" style="width:80%;"></td>
-                                                    <td><input type="text" name="celular" value="<?= htmlspecialchars($user['celular']) ?>" style="width:100%;"></td>
-                                                    <td>********</td>
-                                                    <td>--</td>
-                                                    <td>
-                                                        <button type="submit" class="action-btn preview" title="Guardar" style="background-color: #28a745;"><i class="fa-solid fa-save"></i></button>
-                                                        <a href="adminPanel.php" class="action-btn delete" title="Cancelar"><i class="fa-solid fa-xmark"></i></a>
-                                                    </td>
-                                                </tr>
-                                            </form>
-
-                                        <?php
-                                        // CASO 2: RESTABLECER CONTRASEÑA (Llave)
-                                        elseif ($reset_id == $user['id']):
-                                        ?>
-                                            <form method="POST" action="actualizar_password.php">
-                                                <input type="hidden" name="id" value="<?= $user['id'] ?>">
-                                                <tr>
-                                                    <td><?= $user['id'] ?></td>
-                                                    <td colspan="5">
-                                                        <input type="password" name="nueva_password" placeholder="Escribe la nueva contraseña para <?= htmlspecialchars($user['nombre_completo']) ?>" style="width:100%; padding: 5px;" required minlength="6">
-                                                    </td>
-                                                    <td><small style="color: #ffc107;">Nueva Clave</small></td>
-                                                    <td>--</td>
-                                                    <td>
-                                                        <button type="submit" class="action-btn preview" title="Actualizar Clave" style="background-color: #28a745;"><i class="fa-solid fa-key"></i></button>
-                                                        <a href="adminPanel.php" class="action-btn delete" title="Cancelar"><i class="fa-solid fa-xmark"></i></a>
-                                                    </td>
-                                                </tr>
-                                            </form>
-
-                                        <?php
-                                        // CASO 3: VISTA NORMAL
-                                        else:
-                                        ?>
-                                            <tr>
-                                                <td><?= $user['id'] ?></td>
-                                                <td><?= htmlspecialchars($user['nombre_completo']) ?></td>
-                                                <td><?= htmlspecialchars($user['email']) ?></td>
-                                                <td><?= htmlspecialchars($user['pais_residencia']) ?></td>
-                                                <td><?= htmlspecialchars($user['ciudad_residencia']) ?></td>
-                                                <td><?= htmlspecialchars($user['codigo_celular'] . " " . $user['celular']) ?></td>
-                                                <td>********</td>
-                                                <td>2025-12-21</td>
-                                                <td>
-                                                    <a href="adminPanel.php?edit_id=<?= $user['id'] ?>" class="action-btn edit" title="Editar"><i class="fa-solid fa-pencil"></i></a>
-
-                                                    <a href="adminPanel.php?reset_id=<?= $user['id'] ?>" class="action-btn reset-pass" title="Resetear Contraseña" style="text-decoration:none; color:inherit;">
-                                                        <i class="fa-solid fa-key"></i>
-                                                    </a>
-
-                                                    <button class="action-btn delete" onclick="confirmarEliminar(<?= $user['id'] ?>, '<?= $user['nombre_completo'] ?>')">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                <?php
-                                        endif;
-                                    endwhile;
-                                endif;
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
+                <div style="overflow-x:auto;">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>País</th>
+                                <th>Ciudad</th>
+                                <th>Celular</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($user = $res_usuarios->fetch_assoc()): ?>
+                                <?php if ($edit_id == $user['id']): ?>
+                                    <form method="POST" action="actualizar_usuario.php">
+                                        <input type="hidden" name="id" value="<?= $user['id'] ?>">
+                                        <tr>
+                                            <td><?= $user['id'] ?></td>
+                                            <td><input type="text" name="nombre_completo" value="<?= htmlspecialchars($user['nombre_completo']) ?>"></td>
+                                            <td><input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>"></td>
+                                            <td><input type="text" name="pais_residencia" value="<?= htmlspecialchars($user['pais_residencia']) ?>"></td>
+                                            <td><input type="text" name="ciudad_residencia" value="<?= htmlspecialchars($user['ciudad_residencia']) ?>"></td>
+                                            <td><input type="text" name="celular" value="<?= htmlspecialchars($user['celular']) ?>"></td>
+                                            <td>
+                                                <button type="submit" class="action-btn" style="background:#28a745;"><i class="fa-solid fa-save"></i></button>
+                                                <a href="adminPanel.php" class="action-btn delete"><i class="fa-solid fa-xmark"></i></a>
+                                            </td>
+                                        </tr>
+                                    </form>
+                                <?php elseif ($reset_id == $user['id']): ?>
+                                    <form method="POST" action="actualizar_password.php">
+                                        <input type="hidden" name="id" value="<?= $user['id'] ?>">
+                                        <tr>
+                                            <td><?= $user['id'] ?></td>
+                                            <td colspan="5"><input type="password" name="nueva_password" placeholder="Nueva clave para <?= $user['nombre_completo'] ?>..." required></td>
+                                            <td>
+                                                <button type="submit" class="action-btn" style="background:#28a745;"><i class="fa-solid fa-key"></i></button>
+                                                <a href="adminPanel.php" class="action-btn delete"><i class="fa-solid fa-xmark"></i></a>
+                                            </td>
+                                        </tr>
+                                    </form>
+                                <?php else: ?>
+                                    <tr>
+                                        <td><?= $user['id'] ?></td>
+                                        <td><?= htmlspecialchars($user['nombre_completo']) ?></td>
+                                        <td><?= htmlspecialchars($user['email']) ?></td>
+                                        <td><?= htmlspecialchars($user['pais_residencia']) ?></td>
+                                        <td><?= htmlspecialchars($user['ciudad_residencia']) ?></td>
+                                        <td><?= htmlspecialchars($user['codigo_celular'] . " " . $user['celular']) ?></td>
+                                        <td>
+                                            <a href="adminPanel.php?edit_id=<?= $user['id'] ?>&search=<?= $search ?>" class="action-btn edit"><i class="fa-solid fa-pencil"></i></a>
+                                            <a href="adminPanel.php?reset_id=<?= $user['id'] ?>&search=<?= $search ?>" class="action-btn" style="background:#ffc107; color:black;"><i class="fa-solid fa-key"></i></a>
+                                            <button class="action-btn delete" onclick="confirmarEliminar(<?= $user['id'] ?>, '<?= $user['nombre_completo'] ?>')"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
