@@ -39,7 +39,8 @@ $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión o vuelta a una
 $edit_id = $_GET['edit_id'] ?? null;
 $reset_id = $_GET['reset_id'] ?? null;
 $status = $_GET['status'] ?? null;
-$search = $_GET['search'] ?? ''; 
+$search = $_GET['search'] ?? '';
+$msg = $_GET['msg'] ?? '';
 
 // Clases automáticas para que los acordeones se mantengan abiertos según la acción
 $clase_usuarios = ($edit_id || $reset_id || $status || !empty($search)) ? 'active' : '';
@@ -48,8 +49,18 @@ $clase_usuarios = ($edit_id || $reset_id || $status || !empty($search)) ? 'activ
 $sql_usuarios = "SELECT * FROM usuarios WHERE id LIKE '%$search%' OR nombre_completo LIKE '%$search%' OR email LIKE '%$search%' OR pais_residencia LIKE '%$search%' OR ciudad_residencia LIKE '%$search%' OR celular LIKE '%$search%' ORDER BY id DESC";
 $res_usuarios = $conexion->query($sql_usuarios);
 
+// 4. Obtener videos existentes para verificar disponibilidad
+$video_map = [];
+$sql_all_videos = "SELECT * FROM videos";
+$res_all_videos = $conexion->query($sql_all_videos);
+if ($res_all_videos) {
+    while ($vid = $res_all_videos->fetch_assoc()) {
+        // Clave única: Serie_Temporada_Episodio
+        $key = $vid['serie'] . '_' . $vid['temporada'] . '_' . $vid['episodio'];
+        $video_map[$key] = $vid;
+    }
+}
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -115,6 +126,16 @@ $res_usuarios = $conexion->query($sql_usuarios);
             margin: 40px auto;
             padding: 0 20px;
         }
+        
+        .alert-msg {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .alert-success { background-color: #28a745; color: white; }
+        .alert-error { background-color: #dc3545; color: white; }
 
         /* Contenedores de Acordeón (Panel principal) */
         .admin-accordion-block {
@@ -396,7 +417,7 @@ $res_usuarios = $conexion->query($sql_usuarios);
         }
     </style>
     <script>
-       /*document.addEventListener('DOMContentLoaded', function() {
+        /*document.addEventListener('DOMContentLoaded', function() {
             // Script para manejar TODOS los acordeones
             const accordionHeaders = document.querySelectorAll('.accordion-header');
 
@@ -416,44 +437,47 @@ $res_usuarios = $conexion->query($sql_usuarios);
             }
         }
         document.addEventListener('DOMContentLoaded', function() {
-    const accordionHeaders = document.querySelectorAll('.accordion-header');
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
 
-    // 1. Al cargar la página, revisar si había un acordeón abierto
-    const activeAccordionId = localStorage.getItem('activeAccordion');
-    if (activeAccordionId) {
-        const activeBlock = document.getElementById(activeAccordionId);
-        if (activeBlock) {
-            activeBlock.classList.add('active');
-            // Opcional: Hacer scroll suave hasta el acordeón abierto
-            activeBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
+            // 1. Al cargar la página, revisar si había un acordeón abierto
+            const activeAccordionId = localStorage.getItem('activeAccordion');
+            if (activeAccordionId) {
+                const activeBlock = document.getElementById(activeAccordionId);
+                if (activeBlock) {
+                    activeBlock.classList.add('active');
+                    // Opcional: Hacer scroll suave hasta el acordeón abierto
+                    activeBlock.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
 
-    accordionHeaders.forEach((header, index) => {
-        // Asignamos un ID único si no lo tienen para poder identificarlos
-        const block = header.closest('.admin-accordion-block');
-        if (!block.id) block.id = 'accordion-' + index;
+            accordionHeaders.forEach((header, index) => {
+                // Asignamos un ID único si no lo tienen para poder identificarlos
+                const block = header.closest('.admin-accordion-block');
+                if (!block.id) block.id = 'accordion-' + index;
 
-        header.addEventListener('click', function() {
-            // Alternar la clase active
-            block.classList.toggle('active');
+                header.addEventListener('click', function() {
+                    // Alternar la clase active
+                    block.classList.toggle('active');
 
-            // 2. Guardar o borrar el estado en localStorage
-            if (block.classList.contains('active')) {
-                localStorage.setItem('activeAccordion', block.id);
-                
-                // Opcional: Cerrar los demás si quieres que solo uno esté abierto
-                document.querySelectorAll('.admin-accordion-block').forEach(other => {
-                    if (other !== block) {
-                        other.classList.remove('active');
+                    // 2. Guardar o borrar el estado en localStorage
+                    if (block.classList.contains('active')) {
+                        localStorage.setItem('activeAccordion', block.id);
+
+                        // Opcional: Cerrar los demás si quieres que solo uno esté abierto
+                        document.querySelectorAll('.admin-accordion-block').forEach(other => {
+                            if (other !== block) {
+                                other.classList.remove('active');
+                            }
+                        });
+                    } else {
+                        localStorage.removeItem('activeAccordion');
                     }
                 });
-            } else {
-                localStorage.removeItem('activeAccordion');
-            }
+            });
         });
-    });
-});
     </script>
 </head>
 
@@ -464,6 +488,12 @@ $res_usuarios = $conexion->query($sql_usuarios);
     </header>
 
     <div class="admin-content">
+
+        <?php if(!empty($msg)): ?>
+            <div class="alert-msg <?php echo ($status == 'error') ? 'alert-error' : 'alert-success'; ?>">
+                <?php echo htmlspecialchars($msg); ?>
+            </div>
+        <?php endif; ?>
 
         <div class="admin-accordion-block">
             <div class="accordion-header">
@@ -482,12 +512,32 @@ $res_usuarios = $conexion->query($sql_usuarios);
                             <h3 class="series-title">GAME OF THRONES</h3>
 
                             <?php
-                            // Función auxiliar para generar las listas de episodios (solo frontend)
-                            function generate_episodes($season, $count, $available_until = 0)
+                            // Definimos las 8 temporadas de GoT (T1-T6: 10 caps, T7: 7 caps, T8: 6 caps)
+                            $got_seasons = [
+                                1 => 10, 2 => 10, 3 => 10, 4 => 10, 
+                                5 => 10, 6 => 10, 7 => 7,  8 => 6
+                            ];
+
+                            foreach ($got_seasons as $s => $eps) {
+                                echo '<div class="admin-accordion-block">';
+                                echo '<div class="accordion-header"><h2>Temporada ' . $s . '</h2><span class="accordion-arrow">V</span></div>';
+                                echo '<div class="accordion-content episode-list">';
+                                echo generate_episodes('GoT', $s, $eps, $video_map);
+                                echo '</div>';
+                                echo '</div>';
+                            }
+
+                            // Función corregida para generar las listas de episodios con formularios de subida
+                            function generate_episodes($serie, $season, $count, $map)
                             {
                                 $html = '';
+
                                 for ($i = 1; $i <= $count; $i++) {
-                                    $is_available = ($i <= $available_until);
+                                    // Verificar si existe en el mapa de videos
+                                    $key = $serie . '_' . $season . '_' . $i;
+                                    $video_data = isset($map[$key]) ? $map[$key] : null;
+                                    $is_available = ($video_data !== null);
+
                                     $status_class = $is_available ? 'disponible' : 'pendiente';
                                     $status_text = $is_available ? 'Disponible' : 'Pendiente';
 
@@ -495,46 +545,45 @@ $res_usuarios = $conexion->query($sql_usuarios);
                                     $html .= '<span class="episode-name">Episodio ' . $i . ': Capítulo ' . $i . ' (.mp4)</span>';
                                     $html .= '<span class="episode-status status-' . $status_class . '">' . $status_text . '</span>';
 
-                                    // Botones de Acción
                                     $html .= '<span class="episode-actions">';
+
+                                    // --- FORMULARIO PARA SUBIR (Se mantiene igual) ---
+                                    $html .= '<form action="procesar_video.php" method="POST" enctype="multipart/form-data" style="display:inline;">';
+                                    $html .= '  <input type="hidden" name="serie" value="' . $serie . '">';
+                                    $html .= '  <input type="hidden" name="temporada" value="' . $season . '">';
+                                    $html .= '  <input type="hidden" name="episodio" value="' . $i . '">';
+                                    $input_id = "file_" . $serie . "_" . $season . "_" . $i;
+                                    $html .= '  <input type="file" name="video_file" id="' . $input_id . '" style="display:none;" onchange="startUpload(); this.form.submit()">';
+                                    $html .= '  <button type="button" class="action-btn upload" title="Subir" onclick="document.getElementById(\'' . $input_id . '\').click()">';
+                                    $html .= '      <i class="fa-solid fa-upload"></i>';
+                                    $html .= '  </button>';
+                                    $html .= '</form>';
+
+                                    // --- AQUÍ COLOCAS EL CÓDIGO QUE ME MOSTRASTE (Botón Preview) ---
                                     if ($is_available) {
-                                        $html .= '<button class="action-btn preview" title="Previsualizar"><i class="fa-solid fa-eye"></i></button>';
+                                        $folder = ($serie == 'GoT') ? 'got' : 'hotd';
+                                        // Nota: Aquí la ruta debe ser la carpeta donde están los videos
+                                        // Usamos el nombre de archivo real de la base de datos
+                                        $path = "../activos/videos/" . $folder . "/" . $video_data['ruta_archivo'];
+
+                                        $html .= '<button type="button" class="action-btn preview" title="Previsualizar" 
+                        onclick="openPreview(\'' . $path . '\', \'' . $serie . ' - T' . $season . ' E' . $i . '\')">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>';
                                     }
-                                    $html .= '<button class="action-btn upload" title="Subir/Reemplazar"><i class="fa-solid fa-upload"></i></button>';
-                                    $html .= '<button class="action-btn delete" title="Borrar"><i class="fa-solid fa-trash"></i></button>';
+
+                                    // --- BOTÓN ELIMINAR (Se mantiene igual) ---
+                                    $html .= '<a href="eliminar_video.php?serie=' . $serie . '&t=' . $season . '&e=' . $i . '" 
+                     class="action-btn delete" 
+                     title="Borrar" 
+                     onclick="return confirm(\'¿Estás seguro de eliminar este video?\')">
+                     <i class="fa-solid fa-trash"></i>
+                  </a>';
+
                                     $html .= '</span>';
                                     $html .= '</div>';
                                 }
                                 return $html;
-                            }
-
-                            // Definición de Temporadas y Episodios
-                            $go_t_seasons = [
-                                1 => 10, // T1: 10 episodios
-                                2 => 10,
-                                3 => 10,
-                                4 => 10,
-                                5 => 10,
-                                6 => 10,
-                                7 => 7,  // T7: 7 episodios
-                                8 => 6   // T8: 6 episodios
-                            ];
-
-                            // Generar las 8 temporadas
-                            foreach ($go_t_seasons as $season => $episodes_count) {
-                                // Simulamos que T1 está disponible y las demás no
-                                $available_count = ($season == 1) ? $episodes_count : 0;
-
-                                // Usamos la misma estructura de acordeón principal para las temporadas
-                                echo '<div class="admin-accordion-block">'; // Bloque de acordeón para la temporada
-                                echo '<div class="accordion-header">';
-                                echo '<h2>Temporada ' . $season . '</h2>';
-                                echo '<span class="accordion-arrow">V</span>';
-                                echo '</div>';
-                                echo '<div class="accordion-content episode-list">'; // El contenido es la lista de episodios
-                                echo generate_episodes($season, $episodes_count, $available_count);
-                                echo '</div>';
-                                echo '</div>';
                             }
                             ?>
                         </div>
@@ -542,14 +591,13 @@ $res_usuarios = $conexion->query($sql_usuarios);
                         <div class="series-block">
                             <h3 class="series-title">HOUSE OF THE DRAGON</h3>
                             <?php
-                            // HotD (Simulamos 1 temporada con 10 episodios, 3 disponibles)
-                            $hotd_episodes = 10;
-                            $hotd_available = 3;
+                            // HotD (Temporada 1, 10 episodios)
+                            // Ya no necesitamos simular variables, usamos la función con el mapa de la BD
 
                             echo '<div class="admin-accordion-block">';
                             echo '<div class="accordion-header"><h2>Temporada 1</h2><span class="accordion-arrow">V</span></div>';
                             echo '<div class="accordion-content episode-list">';
-                            echo generate_episodes(1, $hotd_episodes, $hotd_available);
+                            echo generate_episodes('HotD', 1, 10, $video_map);
                             echo '</div>';
                             echo '</div>';
                             ?>
@@ -687,6 +735,51 @@ $res_usuarios = $conexion->query($sql_usuarios);
             </div>
         </div>
     </div>
+    <div id="previewModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color: rgba(0,0,0,0.9);">
+        <div style="position:relative; margin: 5% auto; padding:20px; width:80%; max-width:800px; background:#222; border-radius:10px;">
+            <span onclick="closeModal()" style="position:absolute; top:10px; right:20px; color:white; font-size:30px; cursor:pointer;">&times;</span>
+            <h3 id="modalTitle" style="color:white; margin-bottom:15px;">Previsualización</h3>
+            <video id="videoPlayer" width="100%" controls>
+                <source src="" type="video/mp4">
+                Tu navegador no soporta videos.
+            </video>
+        </div>
+    </div>
+    
+    <!-- Overlay de Carga -->
+    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; color:white; text-align:center; padding-top:20%;">
+        <h2>Subiendo video...</h2>
+        <p>Por favor no cierres esta ventana, esto puede tardar unos minutos.</p>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 50px;"></i>
+    </div>
+
+    <script>
+        function openPreview(ruta, titulo) {
+        const modal = document.getElementById('previewModal');
+        const player = document.getElementById('videoPlayer');
+        const title = document.getElementById('modalTitle');
+    
+        // Cambio sutil: usar load() después de cambiar el src
+        player.src = ruta;
+        player.load(); // Esto obliga al navegador a cargar el nuevo archivo
+        
+        title.innerText = titulo;
+        modal.style.display = "block";
+        player.play();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('previewModal');
+            const player = document.getElementById('videoPlayer');
+            modal.style.display = "none";
+            player.pause(); // Detiene el video al cerrar
+            player.src = ""; // Limpia la ruta
+        }
+        
+        function startUpload() {
+            document.getElementById('loadingOverlay').style.display = 'block';
+        }
+    </script>
 </body>
 
 </html>
