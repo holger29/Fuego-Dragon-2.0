@@ -13,37 +13,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_FILES) && empty($_POST)) {
     exit();
 }
 
-// 2. Verificar si se recibió un archivo
-if (isset($_FILES['video_file'])) {
+// 2. Verificar si se recibió un archivo O una URL de Firebase
+if (isset($_FILES['video_file']) || isset($_POST['firebase_url'])) {
     $serie = $_POST['serie'];       // 'GoT' o 'HotD'
     $temporada = $_POST['temporada'];
     $episodio = $_POST['episodio'];
     
-    $file = $_FILES['video_file'];
-    $fileName = $file['name'];
-    $fileTmpName = $file['tmp_name'];
-    $fileError = $file['error'];
+    $ruta_archivo_final = null;
 
-    // 3. Definir la ruta de destino (Storage Local)
-    // Según tu estructura: /activos/videos/got/ o /activos/videos/hotd/
-    $folderName = ($serie == 'GoT') ? 'got' : 'hotd';
-    $destDir = "../activos/videos/" . $folderName . "/";
+    // --- OPCIÓN A: URL DE FIREBASE ---
+    if (isset($_POST['firebase_url']) && !empty($_POST['firebase_url'])) {
+        $ruta_archivo_final = $_POST['firebase_url'];
+    } 
+    // --- OPCIÓN B: ARCHIVO LOCAL (Fallback) ---
+    elseif (isset($_FILES['video_file']) && $_FILES['video_file']['error'] === 0) {
+        $file = $_FILES['video_file'];
+        $fileName = $file['name'];
+        $fileTmpName = $file['tmp_name'];
 
-    // Crear la carpeta si no existe
-    if (!is_dir($destDir)) {
-        mkdir($destDir, 0777, true);
+        // 3. Definir la ruta de destino (Storage Local)
+        $folderName = ($serie == 'GoT') ? 'got' : 'hotd';
+        $destDir = "../activos/videos/" . $folderName . "/";
+
+        // Crear la carpeta si no existe
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0777, true);
+        }
+
+        // Nombre final del archivo: serie_t1_e1_nombreoriginal.mp4
+        $finalFileName = strtolower($serie) . "_t" . $temporada . "_e" . $episodio . "_" . $fileName;
+        $destPath = $destDir . $finalFileName;
+
+        if (move_uploaded_file($fileTmpName, $destPath)) {
+            $ruta_archivo_final = $finalFileName;
+        } else {
+            header("Location: adminPanel.php?status=error&msg=Error+al+mover+archivo+(Permisos)");
+            exit();
+        }
     }
 
-    // Nombre final del archivo: serie_t1_e1_nombreoriginal.mp4
-    $finalFileName = strtolower($serie) . "_t" . $temporada . "_e" . $episodio . "_" . $fileName;
-    $destPath = $destDir . $finalFileName;
-
-    if ($fileError === 0) {
-        // 4. Mover el video de la USB/Temporal a tu carpeta de proyecto
-        if (move_uploaded_file($fileTmpName, $destPath)) {
-            
-            // 5. Registrar en la Base de Datos
-            // Si el registro ya existe, lo actualizamos; si no, lo insertamos.
+    // 5. Registrar en la Base de Datos si tenemos una ruta válida
+    if ($ruta_archivo_final) {
             $sql = "INSERT INTO videos (serie, temporada, episodio, titulo, ruta_archivo, es_gratis) 
                     VALUES (?, ?, ?, ?, ?, ?) 
                     ON DUPLICATE KEY UPDATE ruta_archivo = VALUES(ruta_archivo)";
@@ -54,7 +64,7 @@ if (isset($_FILES['video_file'])) {
             // Lógica de los 4 capítulos gratis (Regla de negocio 2.2)
             $es_gratis = ($serie == 'GoT' && $temporada == 1 && $episodio <= 4) ? 1 : 0;
 
-            $stmt->bind_param("siissi", $serie, $temporada, $episodio, $titulo, $finalFileName, $es_gratis);
+            $stmt->bind_param("siissi", $serie, $temporada, $episodio, $titulo, $ruta_archivo_final, $es_gratis);
             
             if ($stmt->execute()) {
                 // Éxito: Regresamos al panel con un mensaje
@@ -62,11 +72,9 @@ if (isset($_FILES['video_file'])) {
             } else {
                 header("Location: adminPanel.php?status=error&msg=Error+BD:+" . urlencode($conexion->error));
             }
-        } else {
-            header("Location: adminPanel.php?status=error&msg=Error+al+mover+archivo+(Permisos)");
-        }
     } else {
-        header("Location: adminPanel.php?status=error&msg=Error+de+subida+Codigo+" . $fileError);
+        // Si llegamos aquí, no hubo URL de firebase ni archivo válido
+        header("Location: adminPanel.php?status=error&msg=Error+de+subida+o+archivo+no+valido");
     }
 } else {
     header("Location: adminPanel.php?status=error&msg=No+se+recibio+archivo");

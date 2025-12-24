@@ -313,6 +313,12 @@ if ($res_all_videos) {
             /* Gris/Azul para subir */
             color: white;
         }
+        
+        .action-btn.link {
+            background-color: #6f42c1;
+            /* Morado para vincular */
+            color: white;
+        }
 
         .action-btn.delete {
             background-color: #dc3545;
@@ -553,18 +559,28 @@ if ($res_all_videos) {
                                     $html .= '  <input type="hidden" name="temporada" value="' . $season . '">';
                                     $html .= '  <input type="hidden" name="episodio" value="' . $i . '">';
                                     $input_id = "file_" . $serie . "_" . $season . "_" . $i;
-                                    $html .= '  <input type="file" name="video_file" id="' . $input_id . '" style="display:none;" onchange="startUpload(); this.form.submit()">';
+                                    $html .= '  <input type="file" name="video_file" id="' . $input_id . '" style="display:none;" onchange="uploadToFirebase(this)">';
                                     $html .= '  <button type="button" class="action-btn upload" title="Subir" onclick="document.getElementById(\'' . $input_id . '\').click()">';
                                     $html .= '      <i class="fa-solid fa-upload"></i>';
                                     $html .= '  </button>';
                                     $html .= '</form>';
+                                    
+                                    // --- BOTÓN VINCULAR (NUEVO) ---
+                                    $html .= '<button type="button" class="action-btn link" title="Vincular URL existente (Firebase)" onclick="linkExistingVideo(\'' . $serie . '\', ' . $season . ', ' . $i . ')">';
+                                    $html .= '  <i class="fa-solid fa-link"></i>';
+                                    $html .= '</button>';
 
                                     // --- AQUÍ COLOCAS EL CÓDIGO QUE ME MOSTRASTE (Botón Preview) ---
                                     if ($is_available) {
-                                        $folder = ($serie == 'GoT') ? 'got' : 'hotd';
-                                        // Nota: Aquí la ruta debe ser la carpeta donde están los videos
-                                        // Usamos el nombre de archivo real de la base de datos
-                                        $path = "../activos/videos/" . $folder . "/" . $video_data['ruta_archivo'];
+                                        $ruta_db = $video_data['ruta_archivo'];
+                                        
+                                        // Verificar si es una URL de Firebase (comienza con http) o archivo local
+                                        if (strpos($ruta_db, 'http') === 0) {
+                                            $path = $ruta_db;
+                                        } else {
+                                            $folder = ($serie == 'GoT') ? 'got' : 'hotd';
+                                            $path = "../activos/videos/" . $folder . "/" . $ruta_db;
+                                        }
 
                                         $html .= '<button type="button" class="action-btn preview" title="Previsualizar" 
                         onclick="openPreview(\'' . $path . '\', \'' . $serie . ' - T' . $season . ' E' . $i . '\')">
@@ -750,6 +766,7 @@ if ($res_all_videos) {
     <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; color:white; text-align:center; padding-top:20%;">
         <h2>Subiendo video...</h2>
         <p>Por favor no cierres esta ventana, esto puede tardar unos minutos.</p>
+        <h2 id="progressText" style="font-size: 3em; margin: 20px 0;">0%</h2>
         <i class="fa-solid fa-spinner fa-spin" style="font-size: 50px;"></i>
     </div>
 
@@ -778,6 +795,101 @@ if ($res_all_videos) {
         
         function startUpload() {
             document.getElementById('loadingOverlay').style.display = 'block';
+        }
+
+        function linkExistingVideo(serie, temporada, episodio) {
+            const url = prompt("Ingresa la URL del video (Firebase Storage) para el " + serie + " T" + temporada + " E" + episodio + ":");
+            if (url && url.trim() !== "") {
+                // Crear formulario dinámico para enviar la URL a procesar_video.php
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'procesar_video.php';
+                
+                const fields = {serie, temporada, episodio, firebase_url: url};
+                for (const key in fields) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden'; input.name = key; input.value = fields[key];
+                    form.appendChild(input);
+                }
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+
+    <!-- FIREBASE SDKs (Compat version para facilitar integración) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script>
+        // --- CONFIGURACIÓN DE FIREBASE ---
+        // REEMPLAZA ESTOS VALORES CON LOS DE TU PROYECTO EN FIREBASE CONSOLE
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6i54IxaghsAaSrlRAW0OBMYJn4RwQePE",
+            authDomain: "fuego-dragon-2-0.firebaseapp.com",
+            projectId: "fuego-dragon-2-0",
+            storageBucket: "fuego-dragon-2-0.firebasestorage.app",
+            messagingSenderId: "996643678996",
+            appId: "1:996643678996:web:7605f4c1a1a1c669ec7001"
+        };
+
+        // Validación de seguridad: Verificar si se han reemplazado las credenciales
+        if (firebaseConfig.apiKey === "TU_API_KEY_AQUI") {
+            alert("¡ERROR DE CONFIGURACIÓN!\n\nNo has reemplazado las credenciales de Firebase en el archivo adminPanel.php.\n\nPor favor edita el código y pon tus datos reales del proyecto Firebase.");
+        }
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        function uploadToFirebase(inputElement) {
+            const file = inputElement.files[0];
+            if (!file) return;
+
+            // Mostrar overlay de carga
+            document.getElementById('loadingOverlay').style.display = 'block';
+
+            // Obtener metadatos del formulario
+            const form = inputElement.form;
+            const serie = form.serie.value;
+            const temporada = form.temporada.value;
+            const episodio = form.episodio.value;
+
+            // Crear referencia en Storage: videos/Serie/T1/E1_nombre.mp4
+            const path = `videos/${serie}/t${temporada}/e${episodio}_${file.name}`;
+            const storageRef = firebase.storage().ref().child(path);
+            const uploadTask = storageRef.put(file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Progreso (opcional: podrías mostrar el % en el overlay)
+                    var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Subida: ' + progress + '%');
+                    document.getElementById('progressText').innerText = Math.floor(progress) + '%';
+                }, 
+                (error) => {
+                    alert("Error al subir a Firebase: " + error.message);
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }, 
+                () => {
+                    // Subida completada con éxito
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // 1. Crear input oculto con la URL
+                        const urlInput = document.createElement('input');
+                        urlInput.type = 'hidden';
+                        urlInput.name = 'firebase_url';
+                        urlInput.value = downloadURL;
+                        form.appendChild(urlInput);
+
+                        // 2. Quitar el nombre del input file para que NO se envíe el archivo físico al servidor PHP
+                        inputElement.removeAttribute('name');
+
+                        // 3. Enviar el formulario a procesar_video.php
+                        form.submit();
+                    });
+                }
+            );
         }
     </script>
 </body>
