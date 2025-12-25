@@ -1,6 +1,13 @@
 <?php
-// PHP estático para definir rutas necesarias para los enlaces de frontend.
-// NOTA: Esta sección no tiene lógica de backend.
+session_start();
+include("../conexion/conexion.php");
+
+// Verificar sesión
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: ../autenticacion/login.php");
+    exit();
+}
+
 $ruta_dashboard = "dashboard.php"; // Volver al dashboard (en la misma carpeta)
 $ruta_perfil = "perfil.php";
 $ruta_LandingPage = "../LandingPage.php"; 
@@ -38,6 +45,14 @@ $temporadas = [
     ],
     */
 ];
+
+// --- CONSULTAR DISPONIBILIDAD EN BD ---
+$videos_disponibles = [];
+$sql_v = "SELECT temporada, episodio FROM videos WHERE serie = 'HotD'";
+$res_v = $conexion->query($sql_v);
+while($row = $res_v->fetch_assoc()) {
+    $videos_disponibles[$row['temporada'] . '_' . $row['episodio']] = true;
+}
 ?>
 
 <!DOCTYPE html>
@@ -401,9 +416,19 @@ $temporadas = [
                                             <p><?php echo $episodio['resumen']; ?></p>
                                         </div>
                                         <div class="episode-actions">
-                                            <span class="fa-solid fa-lock fa-2x locked-icon" title="Bloqueado"></span>
-                                            <span class="fa-solid fa-circle-play fa-2x action-icon" title="Ver"></span>
-                                            <span class="fa-solid fa-download fa-2x action-icon" title="Descargar"></span>
+                                            <?php 
+                                                $ep_num = $i + 1;
+                                                $key = $num . '_' . $ep_num;
+                                                $disponible = isset($videos_disponibles[$key]);
+                                            ?>
+
+                                            <?php if ($disponible): ?>
+                                                <a href="ver_video.php?serie=HotD&t=<?php echo $num; ?>&e=<?php echo $ep_num; ?>" class="fa-solid fa-circle-play fa-2x action-icon" title="Ver Online" style="text-decoration:none;"></a>
+                                                <a href="procesar_descarga.php?serie=HotD&t=<?php echo $num; ?>&e=<?php echo $ep_num; ?>" class="fa-solid fa-download fa-2x action-icon" title="Descargar" style="text-decoration:none;"></a>
+                                            <?php else: ?>
+                                                <span class="fa-solid fa-lock fa-2x locked-icon" title="Bloqueado"></span>
+                                                <span style="color:#555; font-size:0.8em;">Próximamente</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>

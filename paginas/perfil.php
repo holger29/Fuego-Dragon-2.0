@@ -28,6 +28,21 @@ $usuario_celular_completo = $datos['celular']; // Ejemplo: "+505 35985477"
 
 $ruta_salir = "../autenticacion/logout.php"; // cierre de sesión
 $ruta_dashboard="dashboard.php";
+
+// 5. CONSULTAR HISTORIALES
+// Historial de Visualización (Últimos 20)
+$sql_vistas = "SELECT serie, temporada, episodio, fecha_vista FROM historial_vistas WHERE usuario_id = ? ORDER BY fecha_vista DESC LIMIT 20";
+$stmt_v = $conexion->prepare($sql_vistas);
+$stmt_v->bind_param("i", $id_usuario);
+$stmt_v->execute();
+$res_vistas = $stmt_v->get_result();
+
+// Contenido Adquirido (Descargas)
+$sql_descargas = "SELECT serie, temporada, episodio, fecha_descarga FROM historial_descargas WHERE usuario_id = ? ORDER BY fecha_descarga DESC";
+$stmt_d = $conexion->prepare($sql_descargas);
+$stmt_d->bind_param("i", $id_usuario);
+$stmt_d->execute();
+$res_descargas = $stmt_d->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -42,6 +57,13 @@ $ruta_dashboard="dashboard.php";
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
     
     <style>
+        /* Estilos para tablas de historial */
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .history-table th, .history-table td { padding: 12px; text-align: left; border-bottom: 1px solid #333; color: #ccc; }
+        .history-table th { color: #a30000; font-weight: bold; }
+        .history-table tr:hover { background-color: #222; }
+        .date-col { font-size: 0.85em; color: #666; }
+
         /* Estilos generales */
         html, body {
             height: 100%;
@@ -480,7 +502,28 @@ $ruta_dashboard="dashboard.php";
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
-                <p class="no-data">Aún no has visto ningún episodio.</p>
+                <?php if ($res_vistas->num_rows > 0): ?>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Serie</th>
+                                <th>Episodio</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $res_vistas->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo $row['serie']; ?></td>
+                                    <td>T<?php echo $row['temporada']; ?> - E<?php echo $row['episodio']; ?></td>
+                                    <td class="date-col"><?php echo date("d/m/Y H:i", strtotime($row['fecha_vista'])); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p class="no-data">Aún no has visto ningún episodio.</p>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -490,7 +533,28 @@ $ruta_dashboard="dashboard.php";
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
-                <p class="no-data">No has comprado contenido adicional.</p>
+                <?php if ($res_descargas->num_rows > 0): ?>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Serie</th>
+                                <th>Episodio</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $res_descargas->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo $row['serie']; ?></td>
+                                    <td>T<?php echo $row['temporada']; ?> - E<?php echo $row['episodio']; ?></td>
+                                    <td class="date-col"><?php echo date("d/m/Y H:i", strtotime($row['fecha_descarga'])); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p class="no-data">No has descargado contenido aún.</p>
+                <?php endif; ?>
             </div>
         </div>
         

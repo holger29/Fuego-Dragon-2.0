@@ -1,5 +1,13 @@
 <?php
-// PHP estático para definir rutas necesarias para los enlaces de frontend.
+session_start();
+include("../conexion/conexion.php");
+
+// Verificar sesión
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: ../autenticacion/login.php");
+    exit();
+}
+
 $ruta_dashboard = "dashboard.php"; 
 $ruta_perfil = "perfil.php";
 $ruta_logout = "../autenticacion/logout.php"; 
@@ -56,6 +64,14 @@ $temporadas = [
         'episodios' => generar_episodios(6, 8), // 6 episodios
     ],
 ];
+
+// --- CONSULTAR DISPONIBILIDAD EN BD ---
+$videos_disponibles = [];
+$sql_v = "SELECT temporada, episodio FROM videos WHERE serie = 'GoT'";
+$res_v = $conexion->query($sql_v);
+while($row = $res_v->fetch_assoc()) {
+    $videos_disponibles[$row['temporada'] . '_' . $row['episodio']] = true;
+}
 ?>
 
 <!DOCTYPE html>
@@ -431,14 +447,21 @@ $temporadas = [
                                             <p><?php echo $episodio['resumen']; ?></p>
                                         </div>
                                         <div class="episode-actions">
-                                            <?php if ($num == 1 && $i < 4): // Temporada 1, primeros 4 episodios (índices 0, 1, 2, 3) ?>
-                                                <span class="tag-free">GRATIS</span>
-                                                <span class="fa-solid fa-circle-play fa-2x action-icon" title="Ver"></span> 
-                                                <span class="fa-solid fa-download fa-2x action-icon" title="descargar"></span> 
-                                            <?php else: // Resto de episodios bloqueados ?>
+                                            <?php 
+                                                $ep_num = $i + 1; // Ajuste de índice 0 a 1
+                                                $key = $num . '_' . $ep_num;
+                                                $disponible = isset($videos_disponibles[$key]);
+                                            ?>
+
+                                            <?php if ($disponible): ?>
+                                                <?php if ($num == 1 && $i < 4) echo '<span class="tag-free">GRATIS</span>'; ?>
+                                                
+                                                <a href="ver_video.php?serie=GoT&t=<?php echo $num; ?>&e=<?php echo $ep_num; ?>" class="fa-solid fa-circle-play fa-2x action-icon" title="Ver Online" style="text-decoration:none;"></a>
+                                                <a href="procesar_descarga.php?serie=GoT&t=<?php echo $num; ?>&e=<?php echo $ep_num; ?>" class="fa-solid fa-download fa-2x action-icon" title="Descargar" style="text-decoration:none;"></a>
+                                            
+                                            <?php else: ?>
                                                 <span class="fa-solid fa-lock fa-2x locked-icon" title="Bloqueado"></span>
-                                                <span class="fa-solid fa-circle-play fa-2x action-icon" title="Ver"></span>
-                                                <span class="fa-solid fa-download fa-2x action-icon" title="Descargar"></span>
+                                                <span style="color:#555; font-size:0.8em;">Próximamente</span>
                                             <?php endif; ?>
                                         </div>
                                     </div>
