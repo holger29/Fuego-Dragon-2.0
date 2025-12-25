@@ -234,6 +234,12 @@
     <div class="auth-container">
         <h1>REGISTRO DE NUEVO USUARIO</h1>
 
+        <?php if (isset($_GET['msg'])): ?>
+            <div class="message <?php echo ($_GET['status'] == 'error') ? 'error' : 'success'; ?>">
+                <?php echo htmlspecialchars($_GET['msg']); ?>
+            </div>
+        <?php endif; ?>
+
         <form action="guardar_usuario.php" method="POST">
             <div class="form-group">
                 <label for="nombre">Nombre Completo:</label>

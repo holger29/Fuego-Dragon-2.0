@@ -582,8 +582,12 @@ if ($res_all_videos) {
                                             $path = "../activos/videos/" . $folder . "/" . $ruta_db;
                                         }
 
+                                        // Sanitizar variables para evitar errores de sintaxis en JS o HTML
+                                        $safe_path = htmlspecialchars($path, ENT_QUOTES, 'UTF-8');
+                                        $safe_title = htmlspecialchars($serie . ' - T' . $season . ' E' . $i, ENT_QUOTES, 'UTF-8');
+
                                         $html .= '<button type="button" class="action-btn preview" title="Previsualizar" 
-                        onclick="openPreview(\'' . $path . '\', \'' . $serie . ' - T' . $season . ' E' . $i . '\')">
+                        onclick="openPreview(\'' . $safe_path . '\', \'' . $safe_title . '\')">
                         <i class="fa-solid fa-eye"></i>
                       </button>';
                                     }
@@ -798,8 +802,9 @@ if ($res_all_videos) {
         }
 
         function linkExistingVideo(serie, temporada, episodio) {
-            const url = prompt("Ingresa la URL del video (Firebase Storage) para el " + serie + " T" + temporada + " E" + episodio + ":");
+            let url = prompt("Ingresa la URL del video (Firebase Storage) para el " + serie + " T" + temporada + " E" + episodio + ":");
             if (url && url.trim() !== "") {
+                url = url.trim(); // Limpiar espacios en blanco accidentales al copiar/pegar
                 // Crear formulario dinámico para enviar la URL a procesar_video.php
                 const form = document.createElement('form');
                 form.method = 'POST';
@@ -824,17 +829,31 @@ if ($res_all_videos) {
     <script>
         // --- CONFIGURACIÓN DE FIREBASE ---
         // REEMPLAZA ESTOS VALORES CON LOS DE TU PROYECTO EN FIREBASE CONSOLE
+        <?php
+        // Incluimos el archivo de secretos que NO se sube a GitHub
+        // Si el archivo no existe, definimos variables vacías para evitar errores
+        if (file_exists('firebase_secrets.php')) {
+            include('firebase_secrets.php');
+        } else {
+            $firebase_apiKey = "FALTA_CONFIGURAR";
+            $firebase_authDomain = "";
+            $firebase_projectId = "";
+            $firebase_storageBucket = "";
+            $firebase_messagingSenderId = "";
+            $firebase_appId = "";
+        }
+        ?>
         const firebaseConfig = {
-            apiKey: "AIzaSyD6i54IxaghsAaSrlRAW0OBMYJn4RwQePE",
-            authDomain: "fuego-dragon-2-0.firebaseapp.com",
-            projectId: "fuego-dragon-2-0",
-            storageBucket: "fuego-dragon-2-0.firebasestorage.app",
-            messagingSenderId: "996643678996",
-            appId: "1:996643678996:web:7605f4c1a1a1c669ec7001"
+            apiKey: "<?php echo $firebase_apiKey; ?>",
+            authDomain: "<?php echo $firebase_authDomain; ?>",
+            projectId: "<?php echo $firebase_projectId; ?>",
+            storageBucket: "<?php echo $firebase_storageBucket; ?>",
+            messagingSenderId: "<?php echo $firebase_messagingSenderId; ?>",
+            appId: "<?php echo $firebase_appId; ?>"
         };
 
         // Validación de seguridad: Verificar si se han reemplazado las credenciales
-        if (firebaseConfig.apiKey === "TU_API_KEY_AQUI") {
+        if (firebaseConfig.apiKey === "FALTA_CONFIGURAR" || firebaseConfig.apiKey === "") {
             alert("¡ERROR DE CONFIGURACIÓN!\n\nNo has reemplazado las credenciales de Firebase en el archivo adminPanel.php.\n\nPor favor edita el código y pon tus datos reales del proyecto Firebase.");
         }
 
