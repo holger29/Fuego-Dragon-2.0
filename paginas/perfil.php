@@ -73,7 +73,7 @@ $res_descargas = $stmt_d->get_result();
         body {
             background-color: #121212;
             color: #f4f4f4;
-            font-family: Arial, sans-serif;
+            font-family: 'Cinzel', 'Times New Roman', Georgia, serif;
             overflow-y: scroll;
         }
         .main-header {
@@ -328,6 +328,56 @@ $res_descargas = $stmt_d->get_result();
             font-size: 12px;
             opacity: 0.6;
         }
+
+        /* --- ESTILOS DEL MODAL DE PAGO (Corrección de Scroll) --- */
+        .payment-modal {
+            display: none; 
+            position: fixed; 
+            z-index: 9999; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow-y: auto; /* Habilitar scroll vertical */
+            background-color: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(5px);
+        }
+        .payment-content {
+            background-color: #1a1a1a;
+            margin: 50px auto; /* Margen para permitir scroll */
+            border: 1px solid #333;
+            width: 90%; 
+            max-width: 900px;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .payment-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #222;
+            border-radius: 8px 8px 0 0;
+        }
+        .payment-body { display: flex; flex-wrap: wrap; }
+        .payment-methods { width: 30%; background-color: #151515; border-right: 1px solid #333; padding: 20px; box-sizing: border-box; }
+        .payment-details { width: 70%; padding: 30px; box-sizing: border-box; }
+        .close-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-modal:hover { color: white; }
+        .method-item { padding: 12px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #888; transition: all 0.2s; }
+        .method-item.active { background-color: #2a2a2a; color: white; border-left: 3px solid #0070ba; }
+        .method-item.disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        @media (max-width: 768px) {
+            .payment-body { flex-direction: column; }
+            .payment-methods, .payment-details { width: 100%; border-right: none; }
+            .payment-methods { border-bottom: 1px solid #333; }
+            .payment-content { margin: 20px auto; width: 95%; }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -413,7 +463,7 @@ $res_descargas = $stmt_d->get_result();
             <h1>FUEGO DRAGÓN</h1>
         </a>
         <div class="user-actions">
-            <span class="user-greeting">Bienvenido, <?php echo htmlspecialchars($usuario_nombre); ?></span>
+            <span class="user-greeting">Bienvenid@, <?php echo htmlspecialchars($usuario_nombre); ?></span>
             <a href="#" class="btn-profile">Mi Perfil</a> 
             <a href="<?php echo $ruta_salir; ?>" class="btn-logout">Salir</a>
         </div>
@@ -579,5 +629,94 @@ $res_descargas = $stmt_d->get_result();
             V. 2.0.0
         </p>
     </footer>
+
+    <!-- MODAL DE PAGO (Copiado para funcionalidad en perfil) -->
+    <div id="paymentModal" class="payment-modal">
+        <div class="payment-content">
+            <div class="payment-header">
+                <h2 id="modalTitle">Descargar Video</h2>
+                <span class="close-modal" onclick="document.getElementById('paymentModal').style.display='none'">&times;</span>
+            </div>
+            <div class="payment-body">
+                <div class="payment-methods">
+                    <div class="method-item active"><i class="fa-brands fa-paypal" style="color:#0070ba;"></i> <span>PayPal</span></div>
+                </div>
+                <div class="payment-details">
+                    <p style="color:#ccc;">Estás a punto de adquirir:</p>
+                    <h3 id="productName" style="color:white; margin:10px 0;">Video</h3>
+                    <div class="price-display" id="productPrice">$0.00</div>
+                    <div id="paypal-button-container" style="width:100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID_AQUI&currency=USD"></script>
+    <script>
+        let currentSerie = '';
+        let currentSeason = 0;
+        let currentEpisode = 0;
+        let currentPrice = 0;
+
+        function abrirModalPago(tipo, serie, temporada, episodio, precio) {
+            currentSerie = serie;
+            currentSeason = temporada;
+            currentEpisode = episodio;
+            currentPrice = precio;
+            
+            document.getElementById('productName').innerText = "Descarga: " + serie + " T" + temporada + " E" + episodio;
+            document.getElementById('productPrice').innerText = "$" + precio.toFixed(2) + " USD";
+            document.getElementById('paymentModal').style.display = 'block';
+            document.getElementById('paypal-button-container').innerHTML = '';
+
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({ purchase_units: [{ amount: { value: currentPrice.toString() } }] });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        fetch('guardar_compra.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                serie: currentSerie,
+                                temporada: currentSeason,
+                                episodio: currentEpisode,
+                                tipo: 'descarga',
+                                monto: currentPrice,
+                                orderID: data.orderID
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error en la respuesta del servidor: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if(data.success) {
+                                window.location.href = "procesar_descarga.php?serie=" + currentSerie + "&t=" + currentSeason + "&e=" + currentEpisode;
+                            } else {
+                                alert('Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error en el proceso:', error);
+                            alert('Hubo un problema al procesar la compra. Revisa la consola (F12) para más detalles.');
+                        });
+                    });
+                },
+                onError: function (err) {
+                    console.error('PayPal Error:', err);
+                    alert('Ocurrió un error con la pasarela de pago de PayPal.');
+                }
+            }).render('#paypal-button-container');
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target == modal) modal.style.display = "none";
+        }
+    </script>
 </body>
 </html>

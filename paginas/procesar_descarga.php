@@ -12,6 +12,22 @@ $temp = $_GET['t'];
 $ep = $_GET['e'];
 $usuario_id = $_SESSION['usuario_id'];
 
+// --- VERIFICACIÓN DE PAGO ---
+// Verificamos si existe la autorización creada por guardar_compra.php
+if (isset($_SESSION['descarga_autorizada'])) {
+    $auth = $_SESSION['descarga_autorizada'];
+    // Validar que la autorización coincida con el video solicitado
+    if ($auth['serie'] == $serie && $auth['t'] == $temp && $auth['e'] == $ep) {
+        unset($_SESSION['descarga_autorizada']); // Consumir la autorización (un solo uso)
+    } else {
+        echo "<script>alert('Error de autorización. Por favor intenta pagar nuevamente.'); window.location.href='dashboard.php';</script>";
+        exit();
+    }
+} else {
+    echo "<script>alert('Esta descarga requiere pago ($1 USD para GoT, $2 USD para HotD).'); window.history.back();</script>";
+    exit();
+}
+
 // 1. Obtener la ruta del video
 $sql = "SELECT ruta_archivo FROM videos WHERE serie = ? AND temporada = ? AND episodio = ?";
 $stmt = $conexion->prepare($sql);

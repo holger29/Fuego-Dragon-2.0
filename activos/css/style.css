@@ -450,3 +450,75 @@ de las paginas de perfil.php, dashboard.php, page_GoT.php y page_HotD*/
 .users-table .action-btn.edit { background-color: #007bff; color: white; }
 .users-table .action-btn.delete { background-color: #dc3545; color: white; }
 .users-table .action-btn.reset-pass { background-color: #ffc107; color: black; }
+
+/* =================================
+   MODAL DE PASARELA DE PAGOS
+   ================================= */
+.payment-modal {
+    display: none; 
+    position: fixed; 
+    z-index: 2000; 
+    left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+}
+
+.payment-content {
+    background-color: #1f2a38;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #a30000;
+    width: 90%; max-width: 800px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(163, 0, 0, 0.3);
+}
+
+.payment-header {
+    background-color: #121417;
+    padding: 15px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #333;
+}
+.payment-header h2 { margin: 0; color: #f4f4f4; font-size: 1.5em; }
+.close-modal { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close-modal:hover { color: white; }
+
+.payment-body {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Columna Izquierda: Métodos */
+.payment-methods {
+    flex: 1;
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-right: 1px solid #333;
+    min-width: 250px;
+}
+.method-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; margin-bottom: 10px;
+    background-color: #2b2b2b; border-radius: 6px;
+    cursor: pointer; transition: all 0.3s;
+    border: 1px solid transparent;
+    opacity: 0.6; /* Por defecto inactivos */
+}
+.method-item.active { opacity: 1; border-color: #0070ba; background-color: #334; }
+.method-item.disabled { cursor: not-allowed; filter: grayscale(100%); }
+.method-item img { width: 30px; height: auto; }
+.method-item span { color: #fff; font-weight: bold; }
+.badge-pending { font-size: 0.7em; background: #444; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+
+/* Columna Derecha: Detalles y Botón */
+.payment-details {
+    flex: 1.5;
+    padding: 30px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+}
+.price-display { font-size: 2.5em; color: #28a745; margin: 10px 0 30px 0; font-weight: bold; }

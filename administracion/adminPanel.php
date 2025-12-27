@@ -60,6 +60,24 @@ if ($res_all_videos) {
         $video_map[$key] = $vid;
     }
 }
+
+// 5. Consulta Historial de Compras
+$sql_compras = "SELECT c.id, c.serie, c.temporada, c.fecha_compra, u.email, u.nombre_completo 
+                FROM compras c 
+                JOIN usuarios u ON c.usuario_id = u.id 
+                ORDER BY c.fecha_compra DESC";
+$res_compras = $conexion->query($sql_compras);
+
+// --- CONTADORES PARA NOTIFICACIONES ---
+// 1. Contar Feedback sin leer
+$sql_count_f = "SELECT COUNT(*) as total FROM feedback WHERE leido = 0";
+$res_count_f = $conexion->query($sql_count_f);
+$total_feedback = ($res_count_f) ? $res_count_f->fetch_assoc()['total'] : 0;
+
+// 2. Contar Total de Compras
+$sql_count_c = "SELECT COUNT(*) as total FROM compras";
+$res_count_c = $conexion->query($sql_count_c);
+$total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
 ?>
 
 <!DOCTYPE html>
@@ -366,6 +384,35 @@ if ($res_all_videos) {
             color: #ccc;
         }
 
+        /* Estilos para badges de notificación */
+        .badge-notification {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background-color: #007bff; /* Azul por defecto */
+            color: white;
+            font-size: 0.6em; /* Ajustar según el tamaño de tu H2 */
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-left: 15px;
+            vertical-align: middle;
+            font-weight: normal;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Estilo específico para alertas (Feedback sin leer) */
+        .badge-alert {
+            background-color: #d62828; /* Rojo */
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214, 40, 40, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(214, 40, 40, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214, 40, 40, 0); }
+        }
+
 
         /* --- ESTILOS RESPONSIVE --- */
         @media (max-width: 768px) {
@@ -423,17 +470,6 @@ if ($res_all_videos) {
         }
     </style>
     <script>
-        /*document.addEventListener('DOMContentLoaded', function() {
-            // Script para manejar TODOS los acordeones
-            const accordionHeaders = document.querySelectorAll('.accordion-header');
-
-            accordionHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    const block = this.closest('.admin-accordion-block');
-                    block.classList.toggle('active');
-                });
-            });
-        });*/
         //adminPanel.php (gestionar usuarios)
         // Función para confirmar eliminación de usuario
         function confirmarEliminar(id, nombre) {
@@ -706,7 +742,57 @@ if ($res_all_videos) {
 
         <div class="admin-accordion-block">
             <div class="accordion-header">
-                <h2>COMENTARIOS DE USUARIOS</h2>
+                <h2>
+                    HISTORIAL DE COMPRAS
+                    <span class="badge-notification"><i class="fa-solid fa-bell"></i> <?php echo $total_compras; ?></span>
+                </h2>
+                <span class="accordion-arrow">V</span>
+            </div>
+            <div class="accordion-content">
+                <?php if ($res_compras && $res_compras->num_rows > 0): ?>
+                    <div style="overflow-x:auto;">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Saga</th>
+                                    <th>Temporada</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($compra = $res_compras->fetch_assoc()): ?>
+                                    <tr>
+                                        <td>
+                                            <a href="mailto:<?php echo htmlspecialchars($compra['email']); ?>?subject=¡Gracias por tu compra en Fuego Dragón!&body=Hola <?php echo urlencode($compra['nombre_completo']); ?>,%0D%0A%0D%0AGracias por adquirir la Temporada <?php echo $compra['temporada']; ?> de <?php echo $compra['serie']; ?>. ¡Esperamos que la disfrutes!" 
+                                               title="Enviar correo de felicitación" style="color: #f4f4f4; text-decoration: underline;">
+                                                <?php echo htmlspecialchars($compra['email']); ?>
+                                            </a>
+                                            <br>
+                                            <small style="color: #8fa0b5;"><?php echo htmlspecialchars($compra['nombre_completo']); ?></small>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($compra['serie']); ?></td>
+                                        <td>Temporada <?php echo htmlspecialchars($compra['temporada']); ?></td>
+                                        <td><?php echo htmlspecialchars($compra['fecha_compra']); ?></td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <p style="padding: 20px; text-align: center;">No hay compras registradas aún.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="admin-accordion-block">
+            <div class="accordion-header">
+                <h2>
+                    COMENTARIOS DE USUARIOS
+                    <?php if($total_feedback > 0): ?>
+                        <span class="badge-notification badge-alert"><i class="fa-solid fa-bell"></i> <?php echo $total_feedback; ?></span>
+                    <?php endif; ?>
+                </h2>
                 <span class="accordion-arrow">V</span>
             </div>
 
@@ -888,7 +974,7 @@ if ($res_all_videos) {
                     document.getElementById('progressText').innerText = Math.floor(progress) + '%';
                 }, 
                 (error) => {
-                    alert("Error al subir a Firebase: " + error.message);
+                    alert("Error al subir a Firebase: " + error.code + " - " + error.message);
                     document.getElementById('loadingOverlay').style.display = 'none';
                 }, 
                 () => {
