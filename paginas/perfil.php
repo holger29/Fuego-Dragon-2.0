@@ -43,6 +43,13 @@ $stmt_d = $conexion->prepare($sql_descargas);
 $stmt_d->bind_param("i", $id_usuario);
 $stmt_d->execute();
 $res_descargas = $stmt_d->get_result();
+
+// Contenido Adquirido (Temporadas Desbloqueadas)
+$sql_temporadas = "SELECT serie, temporada, fecha_compra FROM compras WHERE usuario_id = ? AND tipo_compra = 'temporada' ORDER BY fecha_compra DESC";
+$stmt_t = $conexion->prepare($sql_temporadas);
+$stmt_t->bind_param("i", $id_usuario);
+$stmt_t->execute();
+$res_temporadas = $stmt_t->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -579,10 +586,11 @@ $res_descargas = $stmt_d->get_result();
         
         <div class="accordion-block">
             <div class="accordion-header">
-                <h2>CONTENIDO ADQUIRIDO (Descargas)</h2>
+                <h2>CONTENIDO ADQUIRIDO (Descargas y Temporadas)</h2>
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
+                <h3 style="color: #ccc; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">Videos Descargados</h3>
                 <?php if ($res_descargas->num_rows > 0): ?>
                     <table class="history-table">
                         <thead>
@@ -605,12 +613,36 @@ $res_descargas = $stmt_d->get_result();
                 <?php else: ?>
                     <p class="no-data">No has descargado contenido aún.</p>
                 <?php endif; ?>
+
+                <h3 style="color: #ccc; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 30px;">Temporadas Desbloqueadas</h3>
+                <?php if ($res_temporadas->num_rows > 0): ?>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Serie</th>
+                                <th>Temporada</th>
+                                <th>Fecha Compra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $res_temporadas->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo $row['serie']; ?></td>
+                                    <td>Temporada <?php echo $row['temporada']; ?></td>
+                                    <td class="date-col"><?php echo date("d/m/Y H:i", strtotime($row['fecha_compra'])); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p class="no-data">No has desbloqueado temporadas completas aún.</p>
+                <?php endif; ?>
             </div>
         </div>
         
         <div class="accordion-block">
             <div class="accordion-header">
-                <h2>COMENTARIOS Y SUGERENCIAS</h2>
+                <h2>COMENTARIOS, SUGERENCIAS O REPORTAR UN PROBLEMA</h2>
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
@@ -695,6 +727,7 @@ $res_descargas = $stmt_d->get_result();
                         })
                         .then(data => {
                             if(data.success) {
+                                alert('La compra se realizó satisfactoriamente.');
                                 window.location.href = "procesar_descarga.php?serie=" + currentSerie + "&t=" + currentSeason + "&e=" + currentEpisode;
                             } else {
                                 alert('Error: ' + data.message);

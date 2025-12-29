@@ -62,7 +62,7 @@ if ($res_all_videos) {
 }
 
 // 5. Consulta Historial de Compras
-$sql_compras = "SELECT c.id, c.serie, c.temporada, c.fecha_compra, u.email, u.nombre_completo 
+$sql_compras = "SELECT c.id, c.serie, c.temporada, c.episodio, c.tipo_compra, c.fecha_compra, u.email, u.nombre_completo 
                 FROM compras c 
                 JOIN usuarios u ON c.usuario_id = u.id 
                 ORDER BY c.fecha_compra DESC";
@@ -613,6 +613,17 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                                         // Verificar si es una URL de Firebase (comienza con http) o archivo local
                                         if (strpos($ruta_db, 'http') === 0) {
                                             $path = $ruta_db;
+                                        } elseif (strpos($ruta_db, 'gs://') === 0) {
+                                            // Convertir formato gs:// a URL pública HTTP para que el navegador pueda reproducirlo
+                                            $temp_path = substr($ruta_db, 5); // Quitar gs://
+                                            $parts = explode('/', $temp_path, 2);
+                                            if (count($parts) == 2) {
+                                                $bucket = $parts[0];
+                                                $file_path = rawurlencode($parts[1]); // Codificar ruta (ej: / -> %2F)
+                                                $path = "https://firebasestorage.googleapis.com/v0/b/{$bucket}/o/{$file_path}?alt=media";
+                                            } else {
+                                                $path = $ruta_db;
+                                            }
                                         } else {
                                             $folder = ($serie == 'GoT') ? 'got' : 'hotd';
                                             $path = "../activos/videos/" . $folder . "/" . $ruta_db;
@@ -756,7 +767,7 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                                 <tr>
                                     <th>Usuario</th>
                                     <th>Saga</th>
-                                    <th>Temporada</th>
+                                    <th>Detalle Compra</th>
                                     <th>Fecha</th>
                                 </tr>
                             </thead>
@@ -772,7 +783,13 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                                             <small style="color: #8fa0b5;"><?php echo htmlspecialchars($compra['nombre_completo']); ?></small>
                                         </td>
                                         <td><?php echo htmlspecialchars($compra['serie']); ?></td>
-                                        <td>Temporada <?php echo htmlspecialchars($compra['temporada']); ?></td>
+                                        <td>
+                                            <?php if ($compra['tipo_compra'] === 'descarga'): ?>
+                                                Temporada <?php echo htmlspecialchars($compra['temporada']); ?> - Episodio <?php echo htmlspecialchars($compra['episodio']); ?> (Descarga)
+                                            <?php else: ?>
+                                                Temporada <?php echo htmlspecialchars($compra['temporada']); ?> (Completa)
+                                            <?php endif; ?>
+                                        </td>
                                         <td><?php echo htmlspecialchars($compra['fecha_compra']); ?></td>
                                     </tr>
                                 <?php endwhile; ?>
@@ -845,6 +862,7 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
         <div style="position:relative; margin: 5% auto; padding:20px; width:80%; max-width:800px; background:#222; border-radius:10px;">
             <span onclick="closeModal()" style="position:absolute; top:10px; right:20px; color:white; font-size:30px; cursor:pointer;">&times;</span>
             <h3 id="modalTitle" style="color:white; margin-bottom:15px;">Previsualización</h3>
+            <a id="directLink" href="#" target="_blank" style="display:block; margin-bottom:15px; color:#28a745; text-decoration:none; font-weight:bold;"><i class="fa-solid fa-external-link-alt"></i> Abrir video en pestaña nueva (Modo Usuario)</a>
             <video id="videoPlayer" width="100%" controls>
                 <source src="" type="video/mp4">
                 Tu navegador no soporta videos.
@@ -865,12 +883,14 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
         const modal = document.getElementById('previewModal');
         const player = document.getElementById('videoPlayer');
         const title = document.getElementById('modalTitle');
+        const link = document.getElementById('directLink');
     
         // Cambio sutil: usar load() después de cambiar el src
         player.src = ruta;
         player.load(); // Esto obliga al navegador a cargar el nuevo archivo
         
         title.innerText = titulo;
+        link.href = ruta;
         modal.style.display = "block";
         player.play();
         }
@@ -910,6 +930,7 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
 
     <!-- FIREBASE SDKs (Compat version para facilitar integración) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <script>
@@ -927,6 +948,10 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
             $firebase_storageBucket = "";
             $firebase_messagingSenderId = "";
             $firebase_appId = "";
+            
+            // Credenciales de Admin para escritura en Storage
+            $firebase_admin_email = "holgereduardo777@gmail.com";
+            $firebase_admin_password = "HHolger19*";
         }
         ?>
         const firebaseConfig = {
@@ -948,6 +973,21 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
             firebase.initializeApp(firebaseConfig);
         }
 
+        // --- AUTENTICACIÓN AUTOMÁTICA (Necesaria para las reglas de seguridad) ---
+        const adminEmail = "<?php echo isset($firebase_admin_email) ? $firebase_admin_email : 'holgereduardo777@gmail.com'; ?>";
+        const adminPass = "<?php echo isset($firebase_admin_password) ? $firebase_admin_password : 'HHolger19*'; ?>";
+
+        if (adminEmail && adminPass) {
+            firebase.auth().signInWithEmailAndPassword(adminEmail, adminPass)
+                .then((userCredential) => {
+                    console.log("Admin autenticado en Firebase: Permisos de escritura activos.");
+                })
+                .catch((error) => {
+                    console.error("Error Auth Firebase:", error.message);
+                    alert("Error de autenticación en Firebase: " + error.message);
+                });
+        }
+
         function uploadToFirebase(inputElement) {
             const file = inputElement.files[0];
             if (!file) return;
@@ -964,7 +1004,11 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
             // Crear referencia en Storage: videos/Serie/T1/E1_nombre.mp4
             const path = `videos/${serie}/t${temporada}/e${episodio}_${file.name}`;
             const storageRef = firebase.storage().ref().child(path);
-            const uploadTask = storageRef.put(file);
+            
+            // Definir metadatos para que el navegador sepa que es un video y no un archivo genérico
+            const metadata = { contentType: file.type };
+            
+            const uploadTask = storageRef.put(file, metadata);
 
             uploadTask.on('state_changed', 
                 (snapshot) => {
