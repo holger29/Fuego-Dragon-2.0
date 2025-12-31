@@ -19,6 +19,15 @@ if (isset($_POST['marcar_leido'])) {
     $stmt_upd->execute();
 }
 
+// 1.b Procesar la marcación como leído de COMPRAS si se recibe el ID por POST
+if (isset($_POST['marcar_compra_leida'])) {
+    $id_compra = $_POST['id_compra'];
+    $sql_update_c = "UPDATE compras SET leido = 1 WHERE id = ?";
+    $stmt_upd_c = $conexion->prepare($sql_update_c);
+    $stmt_upd_c->bind_param("i", $id_compra);
+    $stmt_upd_c->execute();
+}
+
 // 2. Consulta mejorada: seleccionamos el ID y el estado 'leido'
 $sql_feedback = "SELECT f.id, f.mensaje, f.fecha_envio, f.leido, u.nombre_completo, u.email 
                  FROM feedback f 
@@ -42,8 +51,25 @@ $status = $_GET['status'] ?? null;
 $search = $_GET['search'] ?? '';
 $msg = $_GET['msg'] ?? '';
 
+// Detectar acciones POST (prioridad sobre GET antiguo)
+$is_feedback_action = isset($_POST['marcar_leido']);
+$is_compras_action = isset($_POST['marcar_compra_leida']);
+
+// Si hay una acción POST activa, ignoramos los parámetros GET antiguos para evitar conflictos de acordeones
+if ($is_feedback_action || $is_compras_action) {
+    $status = null;
+    $msg = '';
+}
+
 // Clases automáticas para que los acordeones se mantengan abiertos según la acción
-$clase_usuarios = ($edit_id || $reset_id || $status || !empty($search)) ? 'active' : '';
+// 1. Detectar si es una acción de video (buscando "Video" o "archivo" en el mensaje)
+$is_video_action = ($status && (stripos($msg, 'Video') !== false || stripos($msg, 'archivo') !== false));
+
+$clase_videos = $is_video_action ? 'active' : '';
+$clase_feedback = $is_feedback_action ? 'active' : '';
+$clase_compras = $is_compras_action ? 'active' : '';
+// 2. Usuarios se abre si hay edición, búsqueda, o un status que NO sea de video
+$clase_usuarios = ($edit_id || $reset_id || !empty($search) || ($status && !$is_video_action)) ? 'active' : '';
 
 // 3. Consulta Usuarios con BUSCADOR MULTICRITERIO
 $sql_usuarios = "SELECT * FROM usuarios WHERE id LIKE '%$search%' OR nombre_completo LIKE '%$search%' OR email LIKE '%$search%' OR pais_residencia LIKE '%$search%' OR ciudad_residencia LIKE '%$search%' OR celular LIKE '%$search%' ORDER BY id DESC";
@@ -62,10 +88,10 @@ if ($res_all_videos) {
 }
 
 // 5. Consulta Historial de Compras
-$sql_compras = "SELECT c.id, c.serie, c.temporada, c.episodio, c.tipo_compra, c.fecha_compra, u.email, u.nombre_completo 
+$sql_compras = "SELECT c.id, c.serie, c.temporada, c.episodio, c.tipo_compra, c.fecha_compra, c.leido, u.email, u.nombre_completo 
                 FROM compras c 
                 JOIN usuarios u ON c.usuario_id = u.id 
-                ORDER BY c.fecha_compra DESC";
+                ORDER BY c.leido ASC, c.fecha_compra DESC";
 $res_compras = $conexion->query($sql_compras);
 
 // --- CONTADORES PARA NOTIFICACIONES ---
@@ -75,7 +101,7 @@ $res_count_f = $conexion->query($sql_count_f);
 $total_feedback = ($res_count_f) ? $res_count_f->fetch_assoc()['total'] : 0;
 
 // 2. Contar Total de Compras
-$sql_count_c = "SELECT COUNT(*) as total FROM compras";
+$sql_count_c = "SELECT COUNT(*) as total FROM compras WHERE leido = 0";
 $res_count_c = $conexion->query($sql_count_c);
 $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
 ?>
@@ -537,7 +563,7 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
             </div>
         <?php endif; ?>
 
-        <div class="admin-accordion-block">
+        <div class="admin-accordion-block <?php echo $clase_videos; ?>" id="acc-videos">
             <div class="accordion-header">
                 <h2>GESTIONAR CONTENIDO DE VIDEO</h2>
                 <span class="accordion-arrow">V</span>
@@ -751,11 +777,13 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
             </div>
         </div>
 
-        <div class="admin-accordion-block">
+        <div class="admin-accordion-block <?php echo $clase_compras; ?>" id="acc-compras">
             <div class="accordion-header">
                 <h2>
                     HISTORIAL DE COMPRAS
-                    <span class="badge-notification"><i class="fa-solid fa-bell"></i> <?php echo $total_compras; ?></span>
+                    <?php if($total_compras > 0): ?>
+                        <span class="badge-notification badge-alert"><i class="fa-solid fa-bell"></i> <?php echo $total_compras; ?></span>
+                    <?php endif; ?>
                 </h2>
                 <span class="accordion-arrow">V</span>
             </div>
@@ -769,11 +797,12 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                                     <th>Saga</th>
                                     <th>Detalle Compra</th>
                                     <th>Fecha</th>
+                                    <th>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php while ($compra = $res_compras->fetch_assoc()): ?>
-                                    <tr>
+                                    <tr style="<?php echo ($compra['leido'] == 0) ? 'border-left: 5px solid #a30000; background-color: #1e2630;' : 'opacity: 0.7;'; ?>">
                                         <td>
                                             <a href="mailto:<?php echo htmlspecialchars($compra['email']); ?>?subject=¡Gracias por tu compra en Fuego Dragón!&body=Hola <?php echo urlencode($compra['nombre_completo']); ?>,%0D%0A%0D%0AGracias por adquirir la Temporada <?php echo $compra['temporada']; ?> de <?php echo $compra['serie']; ?>. ¡Esperamos que la disfrutes!" 
                                                title="Enviar correo de felicitación" style="color: #f4f4f4; text-decoration: underline;">
@@ -791,6 +820,18 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                                             <?php endif; ?>
                                         </td>
                                         <td><?php echo htmlspecialchars($compra['fecha_compra']); ?></td>
+                                        <td style="text-align: center;">
+                                            <?php if ($compra['leido'] == 0): ?>
+                                                <form method="POST">
+                                                    <input type="hidden" name="id_compra" value="<?php echo $compra['id']; ?>">
+                                                    <button type="submit" name="marcar_compra_leida" class="action-btn preview" style="background-color: #28a745;" title="Marcar como leído">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            <?php else: ?>
+                                                <span style="color: #28a745;"><i class="fa-solid fa-check-double"></i></span>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
@@ -802,7 +843,7 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
             </div>
         </div>
 
-        <div class="admin-accordion-block">
+        <div class="admin-accordion-block <?php echo $clase_feedback; ?>" id="acc-feedback">
             <div class="accordion-header">
                 <h2>
                     COMENTARIOS DE USUARIOS
