@@ -33,10 +33,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: ../paginas/dashboard.php");
             exit();
         } else {
-            echo "<script>alert('Contraseña incorrecta'); window.location.href='login.php';</script>";
+            // Redirigir con error de contraseña
+            header("Location: login.php?error=wrong_password&email=" . urlencode($email));
+            exit();
         }
     } else {
-        echo "<script>alert('El correo no está registrado'); window.location.href='login.php';</script>";
+        // Redirigir con error de usuario no encontrado
+        header("Location: login.php?error=user_not_found");
+        exit();
     }
 
     $stmt->close();

@@ -32,6 +32,17 @@ if ($row = $res->fetch_assoc()) {
     // Determinar ruta final (Firebase o Local)
     if (strpos($ruta_db, 'http') === 0) {
         $video_src = $ruta_db;
+    } elseif (strpos($ruta_db, 'gs://') === 0) {
+        // Convertir formato gs:// a URL pública HTTP
+        $temp_path = substr($ruta_db, 5); // Quitar gs://
+        $parts = explode('/', $temp_path, 2);
+        if (count($parts) == 2) {
+            $bucket = $parts[0];
+            $file_path = rawurlencode($parts[1]); // Codificar ruta
+            $video_src = "https://firebasestorage.googleapis.com/v0/b/{$bucket}/o/{$file_path}?alt=media";
+        } else {
+            $video_src = $ruta_db;
+        }
     } else {
         $folder = ($serie == 'GoT') ? 'got' : 'hotd';
         $video_src = "../activos/videos/" . $folder . "/" . $ruta_db;

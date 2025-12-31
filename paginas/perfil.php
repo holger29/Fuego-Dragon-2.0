@@ -43,6 +43,13 @@ $stmt_d = $conexion->prepare($sql_descargas);
 $stmt_d->bind_param("i", $id_usuario);
 $stmt_d->execute();
 $res_descargas = $stmt_d->get_result();
+
+// Contenido Adquirido (Temporadas Desbloqueadas)
+$sql_temporadas = "SELECT serie, temporada, fecha_compra FROM compras WHERE usuario_id = ? AND tipo_compra = 'temporada' ORDER BY fecha_compra DESC";
+$stmt_t = $conexion->prepare($sql_temporadas);
+$stmt_t->bind_param("i", $id_usuario);
+$stmt_t->execute();
+$res_temporadas = $stmt_t->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -65,6 +72,10 @@ $res_descargas = $stmt_d->get_result();
         .date-col { font-size: 0.85em; color: #666; }
 
         /* Estilos generales */
+        * {
+            box-sizing: border-box;
+        }
+
         html, body {
             height: 100%;
             margin: 0;
@@ -137,7 +148,7 @@ $res_descargas = $stmt_d->get_result();
             margin-bottom: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
-        .section-header {
+        .section-header {n que part
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -156,11 +167,13 @@ $res_descargas = $stmt_d->get_result();
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            gap: 15px;
         }
         .data-display {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            gap: 10px;
         }
         /* Formulario de edición (oculto por defecto) */
         .data-edit-form {
@@ -192,6 +205,7 @@ $res_descargas = $stmt_d->get_result();
             border-radius: 6px;
             overflow: hidden;
             border: 1px solid #333;
+            max-width: 95%;
         }
         .change-password-header {
             padding: 15px;
@@ -222,11 +236,14 @@ $res_descargas = $stmt_d->get_result();
             overflow: hidden;
             transition: max-height 0.3s ease-in-out;
             padding: 0 20px;
+            padding: 0 15px;
         }
         .change-password-area.active .change-password-content {
-            max-height: 500px;
+            max-height: 1000px;
             padding-top: 20px;
             padding-bottom: 20px;
+            padding-top: 15px;
+            padding-bottom: 15px;
         }
         .change-password-form input {
             width: 100%;
@@ -246,6 +263,7 @@ $res_descargas = $stmt_d->get_result();
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            width: 100%;
         }
 
         /* ACORDEÓN GENERAL (Historial, Adquirido, Comentarios) */
@@ -299,6 +317,7 @@ $res_descargas = $stmt_d->get_result();
             .profile-content {
                 margin-top: 20px;
                 padding: 0 15px 40px 15px;
+                padding: 0 10px 40px 10px;
             }
             .profile-content h1 {
                 font-size: 1.8em;
@@ -308,6 +327,11 @@ $res_descargas = $stmt_d->get_result();
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
+            }
+
+            .profile-section {
+                padding: 15px;
+                padding: 10px;
             }
 
             .user-data-container {
@@ -579,10 +603,11 @@ $res_descargas = $stmt_d->get_result();
         
         <div class="accordion-block">
             <div class="accordion-header">
-                <h2>CONTENIDO ADQUIRIDO (Descargas)</h2>
+                <h2>CONTENIDO ADQUIRIDO (Descargas y Temporadas)</h2>
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
+                <h3 style="color: #ccc; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">Videos Descargados</h3>
                 <?php if ($res_descargas->num_rows > 0): ?>
                     <table class="history-table">
                         <thead>
@@ -605,12 +630,36 @@ $res_descargas = $stmt_d->get_result();
                 <?php else: ?>
                     <p class="no-data">No has descargado contenido aún.</p>
                 <?php endif; ?>
+
+                <h3 style="color: #ccc; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 30px;">Temporadas Desbloqueadas</h3>
+                <?php if ($res_temporadas->num_rows > 0): ?>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Serie</th>
+                                <th>Temporada</th>
+                                <th>Fecha Compra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $res_temporadas->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?php echo $row['serie']; ?></td>
+                                    <td>Temporada <?php echo $row['temporada']; ?></td>
+                                    <td class="date-col"><?php echo date("d/m/Y H:i", strtotime($row['fecha_compra'])); ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p class="no-data">No has desbloqueado temporadas completas aún.</p>
+                <?php endif; ?>
             </div>
         </div>
         
         <div class="accordion-block">
             <div class="accordion-header">
-                <h2>COMENTARIOS Y SUGERENCIAS</h2>
+                <h2>COMENTARIOS, SUGERENCIAS O REPORTAR UN PROBLEMA</h2>
                 <span class="arrow">></span>
             </div>
             <div class="accordion-content">
@@ -695,6 +744,7 @@ $res_descargas = $stmt_d->get_result();
                         })
                         .then(data => {
                             if(data.success) {
+                                alert('La compra se realizó satisfactoriamente.');
                                 window.location.href = "procesar_descarga.php?serie=" + currentSerie + "&t=" + currentSeason + "&e=" + currentEpisode;
                             } else {
                                 alert('Error: ' + data.message);

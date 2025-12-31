@@ -576,9 +576,10 @@ while($row = $res_c->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- SDK de PayPal -->
+    <!--Script para prueba con sandbox-->
+    <!--<script src="https://www.paypal.com/sdk/js?client-id=Adbvp1XqGK34AhK_3O7JCJiYLsuYhp2m4FYMPBl0inzREYSUZXIUQTlVrjZ_eRMd816ZAIeLZzI1xzL-&currency=USD"></script>-->
+                                                    <!-- SDK de PayPal real -->
     <script src="https://www.paypal.com/sdk/js?client-id=AZddESFFSR0zqEJxvemSFiKQNtxyey0vRGGmwsJOfTxL9nlO3e22V3W0psDkJD_E9kkOEFubh67ESmit&currency=USD"></script>
-
     <script>
         let currentSeason = 0;
         let currentEpisode = 0;
@@ -634,9 +635,10 @@ while($row = $res_c->fetch_assoc()) {
                         .then(data => {
                             if(data.success) {
                                 if (currentType === 'descarga') {
+                                    alert('La compra se realizó satisfactoriamente.');
                                     window.location.href = "procesar_descarga.php?serie=" + serieName + "&t=" + currentSeason + "&e=" + currentEpisode;
                                 } else {
-                                    alert('¡Temporada desbloqueada!');
+                                    alert('El desbloqueo de la temporada se realizó satisfactoriamente.');
                                     location.reload();
                                 }
                             } else {
