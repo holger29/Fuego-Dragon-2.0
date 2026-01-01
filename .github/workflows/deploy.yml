@@ -1,0 +1,25 @@
+# Nombre del workflow que verás en la pestaña "Actions" de GitHub
+name: Deploy to TonoHost
+
+# Evento que dispara el workflow: un push a la rama 'main'
+on:
+  push:
+    branches:
+      - main # Si tu rama principal se llama 'master', cambia esto a 'master'
+
+jobs:
+  ftp-deploy:
+    name: FTP Deploy
+    runs-on: ubuntu-latest # El tipo de máquina virtual que usará GitHub
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3 # Acción para descargar tu código en la máquina virtual
+
+    - name: FTP Deploy Action
+      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: htdocs/ # ¡Importante! El directorio raíz de tu hosting
