@@ -179,7 +179,7 @@
         <div class="link-group">
             <a href="registro.php">¿No tienes cuenta? Regístrate aquí.</a>
             <br>
-            <a href="../LandingPage.php">← Volver a la página principal</a>
+            <a href="../index.php">← Volver a la página principal</a>
         </div>
     </div>
 
