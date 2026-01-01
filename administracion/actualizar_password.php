@@ -23,9 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['admin_id'])) {
         $stmt->close();
     } else {
         header("Location: adminPanel.php?status=error&msg=La+contraseña+no+puede+estar+vacía");
+        header("Location: adminpanel.php?status=error&msg=La+contraseña+no+puede+estar+vacía");
     }
 } else {
     header("Location: adminPanel.php");
+    header("Location: adminpanel.php");
 }
 
 $conexion->close();

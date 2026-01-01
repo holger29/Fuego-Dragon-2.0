@@ -140,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn-entrar">Entrar</button>
         </form>
 
-        <a href="../LandingPage.php" class="back-link">← Ir a Landing Page</a>
+        <a href="../index.php" class="back-link">← Ir a Landing Page</a>
     </div>
 
 </body>

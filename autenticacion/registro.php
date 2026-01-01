@@ -1,6 +1,6 @@
 <?php
     $ruta_login = "login.php";
-    $ruta_regresar_home = "../LandingPage.php";
+    $ruta_regresar_home = "../index.php";
     //$ruta_dashboard = "../paginas/dashboard.php";
 
     // --- LISTA EXTENDIDA DE PAÍSES Y SUS PREFIJOS TELEFÓNICOS (MÁS ROBUSTA) ---

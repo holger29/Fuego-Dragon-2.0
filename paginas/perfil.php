@@ -148,7 +148,7 @@ $res_temporadas = $stmt_t->get_result();
             margin-bottom: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
-        .section-header {n que part
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -672,13 +672,6 @@ $res_temporadas = $stmt_t->get_result();
 
     </div>
 
-    <footer>
-        <p>
-            © <?php echo date("Y"); ?> Fuego Dragón - Todos los derechos reservados.<br>
-            V. 2.0.0
-        </p>
-    </footer>
-
     <!-- MODAL DE PAGO (Copiado para funcionalidad en perfil) -->
     <div id="paymentModal" class="payment-modal">
         <div class="payment-content">
@@ -699,7 +692,13 @@ $res_temporadas = $stmt_t->get_result();
             </div>
         </div>
     </div>
-
+    <!--footer-->
+    <footer>
+        <p>
+            © <?php echo date("Y"); ?> Fuego Dragón - Todos los derechos reservados.<br>
+            V. 2.2.0
+        </p>
+    </footer>
     <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID_AQUI&currency=USD"></script>
     <script>
         let currentSerie = '';
@@ -768,5 +767,6 @@ $res_temporadas = $stmt_t->get_result();
             if (event.target == modal) modal.style.display = "none";
         }
     </script>
+
 </body>
 </html>

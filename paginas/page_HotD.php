@@ -10,7 +10,7 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $ruta_dashboard = "dashboard.php"; // Volver al dashboard (en la misma carpeta)
 $ruta_perfil = "perfil.php";
-$ruta_LandingPage = "../LandingPage.php"; 
+$ruta_LandingPage = "../index.php"; 
 
 // Datos simulados para el frontend
 $usuario_nombre = $_SESSION['usuario_nombre'];
@@ -523,7 +523,7 @@ while($row = $res_c->fetch_assoc()) {
     <footer>
         <p>
             © <?php echo date("Y"); ?> Fuego Dragón - Todos los derechos reservados.<br>
-            V. 2.0.0
+            V. 2.2.0
         </p>
     </footer>
 
@@ -575,7 +575,6 @@ while($row = $res_c->fetch_assoc()) {
             </div>
         </div>
     </div>
-
     <!--Script para prueba con sandbox-->
     <!--<script src="https://www.paypal.com/sdk/js?client-id=Adbvp1XqGK34AhK_3O7JCJiYLsuYhp2m4FYMPBl0inzREYSUZXIUQTlVrjZ_eRMd816ZAIeLZzI1xzL-&currency=USD"></script>-->
                                                     <!-- SDK de PayPal real -->

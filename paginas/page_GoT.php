@@ -617,7 +617,7 @@ while($row = $res_c->fetch_assoc()) {
     <footer>
         <p>
             © <?php echo date("Y"); ?> Fuego Dragón - Todos los derechos reservados.<br>
-            V. 2.0.0
+            V. 2.2.0
         </p>
     </footer>
 

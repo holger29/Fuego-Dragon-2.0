@@ -494,6 +494,14 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                 justify-content: center;
             }
         }
+        /**footer */
+         footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
     </style>
     <script>
         //adminPanel.php (gestionar usuarios)
@@ -918,7 +926,12 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
         <h2 id="progressText" style="font-size: 3em; margin: 20px 0;">0%</h2>
         <i class="fa-solid fa-spinner fa-spin" style="font-size: 50px;"></i>
     </div>
-
+    <footer>
+        <p>
+            © <?= date("Y") ?> Fuego Dragón - Todos los derechos reservados</br>
+            V. 2.2.0
+        </p> 
+    </footer>
     <script>
         function openPreview(ruta, titulo) {
         const modal = document.getElementById('previewModal');
