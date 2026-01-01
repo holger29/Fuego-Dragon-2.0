@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                 // Si se guarda con éxito, usamos JavaScript para el mensaje y redireccionamos de inmediato
                 echo "<script>
                     alert('¡Gracias por tu feedback! Tus comentarios son importantes para nosotros y nos ayudan a mejorar.');
-                    window.location.href='Perfil.php';
+                    window.location.href='perfil.php';
                 </script>";
                 exit(); // Detenemos el script para asegurar la redirección
             } else {
@@ -49,13 +49,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
         // Si el comentario estaba vacío, simplemente regresamos al perfil
         echo "<script>
             alert('Por favor, escribe un mensaje antes de enviar.');
-            window.location.href='Perfil.php';
+            window.location.href='perfil.php';
         </script>";
         exit();
     }
 } else {
     // Si se intenta acceder al archivo sin una sesión o sin enviar el formulario
-    header("Location: Perfil.php");
+    header("Location: perfil.php");
     exit();
 }
 
