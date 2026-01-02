@@ -33,6 +33,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // 4. Validar que el celular no esté registrado previamente
+    $sql_check_cel = "SELECT id FROM usuarios WHERE celular = ?";
+    $stmt_check = $conexion->prepare($sql_check_cel);
+    $stmt_check->bind_param("s", $celular_completo);
+    $stmt_check->execute();
+    $stmt_check->store_result();
+    if ($stmt_check->num_rows > 0) {
+        header("Location: registro.php?status=error&msg=El+número+de+celular+ya+se+encuentra+registrado");
+        exit();
+    }
+    $stmt_check->close();
+
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
     $sql = "INSERT INTO usuarios (nombre_completo, email, contrasena, pais_residencia, ciudad_residencia, celular) VALUES (?, ?, ?, ?, ?, ?)";
