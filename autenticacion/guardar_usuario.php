@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt_check->execute();
     $stmt_check->store_result();
     if ($stmt_check->num_rows > 0) {
-        header("Location: registro.php?status=error&msg=El+número+de+celular+ya+se+encuentra+registrado");
+        header("Location: registro.php?status=error&msg=El+número+de+celular+ya+se+encuentra+registrado.+Por+favor+utiliza+otro+numero.");
         exit();
     }
     $stmt_check->close();
