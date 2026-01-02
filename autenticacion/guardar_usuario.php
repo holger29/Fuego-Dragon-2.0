@@ -3,13 +3,35 @@ include("../conexion/conexion.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre   = trim($_POST['nombre_completo']);
-    $email    = trim($_POST['email']);
+    $email    = strtolower(trim($_POST['email'])); // Normalización a minúsculas
     $password = $_POST['contrasena'];
     $pais     = trim($_POST['pais_residencia']);
     $ciudad   = trim($_POST['ciudad_residencia']);
     $prefijo  = $_POST['codigo_celular']; 
     $numero   = trim($_POST['celular']);
     $celular_completo = $prefijo . " " . $numero;
+
+    // --- VALIDACIONES DE SEGURIDAD ROBUSTA ---
+
+    // 1. Validar sintaxis de correo (Estándar RFC 5322)
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        header("Location: registro.php?status=error&msg=El+formato+del+correo+electrónico+no+es+válido");
+        exit();
+    }
+
+    // 2. Validar existencia real del dominio (MX Record)
+    // Esto asegura que sea un proveedor real (Gmail, Outlook, Yahoo, etc.)
+    $dominio = substr(strrchr($email, "@"), 1);
+    if (!checkdnsrr($dominio, "MX")) {
+        header("Location: registro.php?status=error&msg=El+dominio+del+correo+no+existe+o+no+es+válido");
+        exit();
+    }
+
+    // 3. Validar complejidad de contraseña (Min 8 chars, 1 Mayúscula, 1 Número)
+    if (strlen($password) < 8 || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        header("Location: registro.php?status=error&msg=La+contraseña+debe+tener+al+menos+8+caracteres,+una+mayúscula+y+un+número");
+        exit();
+    }
 
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 

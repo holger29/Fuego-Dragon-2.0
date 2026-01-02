@@ -240,7 +240,7 @@
             </div>
         <?php endif; ?>
 
-        <form action="guardar_usuario.php" method="POST">
+        <form action="guardar_usuario.php" method="POST" onsubmit="return validarRegistro(event)">
             <div class="form-group">
                 <label for="nombre">Nombre Completo:</label>
                 <input type="text" id="nombre" name="nombre_completo" required>
@@ -254,6 +254,7 @@
             <div class="form-group">
                 <label for="contrasena">Contraseña:</label>
                 <input type="password" id="contrasena" name="contrasena" required>
+                <small style="color: #888; font-size: 0.8em; display:block; margin-top:5px;">Mínimo 8 caracteres, una mayúscula y un número.</small>
             </div>
             
             <div class="form-group">
@@ -326,6 +327,36 @@
 
         // Ejecutar al cargar la página para inicializar el prefijo si el campo de país ya tiene valor (aunque es poco probable en un registro nuevo)
         document.addEventListener('DOMContentLoaded', actualizarPrefijoCelular);
+
+        /**
+         * Validación estricta del formulario (Lógica robusta)
+         */
+        function validarRegistro(event) {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('contrasena').value;
+
+            // 1. Validar Email (Sintaxis estándar)
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                alert("Por favor, introduce un correo electrónico válido (ej: usuario@dominio.com).");
+                event.preventDefault();
+                return false;
+            }
+
+            // 2. Validar Contraseña (Reglas de seguridad)
+            // (?=.*[A-Z]) -> Al menos una mayúscula
+            // (?=.*\d)    -> Al menos un número
+            // .{8,}       -> Mínimo 8 caracteres
+            const passRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+            
+            if (!passRegex.test(password)) {
+                alert("La contraseña no cumple con los requisitos de seguridad:\n- Mínimo 8 caracteres\n- Al menos una mayúscula\n- Al menos un número");
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        }
     </script>
 </body>
 </html>

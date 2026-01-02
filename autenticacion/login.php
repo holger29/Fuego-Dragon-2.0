@@ -214,7 +214,7 @@
             var email = document.getElementById('email_recuperacion').value;
             var adminEmail = "holgereduardo777@outlook.com";
             var asunto = "Restablecimiento de contraseña";
-            var cuerpo = "Cordial saludos equipo de Fuego dragón, el presente correo es para solicitar el restablesimiento de mi contraseña. Quedo atent@ muchas gracias. atentmente: '" + email + "'";
+            var cuerpo = "Cordial saludos equipo de Fuego dragón, el presente correo es para solicitar el restablecimiento de mi contraseña. Quedo atent@ muchas gracias. atentamente: '" + email + "'";
             
             var mailtoLink = "mailto:" + adminEmail + "?subject=" + encodeURIComponent(asunto) + "&body=" + encodeURIComponent(cuerpo);
             

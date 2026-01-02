@@ -20,6 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // Validar complejidad de contraseña (Min 8 chars, 1 Mayúscula, 1 Número)
+    if (strlen($pass_nueva) < 8 || !preg_match('/[A-Z]/', $pass_nueva) || !preg_match('/[0-9]/', $pass_nueva)) {
+        echo "<script>alert('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número'); window.location.href='perfil.php';</script>";
+        exit();
+    }
+
     // 3. Obtener el hash de la contraseña actual de la BD
     $sql = "SELECT contrasena FROM usuarios WHERE id = ?";
     $stmt = $conexion->prepare($sql);

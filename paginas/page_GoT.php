@@ -316,11 +316,7 @@ while($row = $res_c->fetch_assoc()) {
             font-size: 1.5em;
             transition: transform 0.3s;
         }
-        /* Muestra solo la primera temporada abierta por defecto para el ejemplo */
-        .accordion-block:nth-child(2) .accordion-arrow {
-            /* Simular abierto al inicio si es necesario, si no, usa el JS */
-            /*padding:10px;*/
-        }
+       
         .accordion-content {
             max-height: 0;
             overflow: hidden;

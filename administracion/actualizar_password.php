@@ -8,6 +8,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['admin_id'])) {
     $pass = $_POST['nueva_password'];
 
     if (!empty($pass)) {
+        // Validar complejidad de contraseña (Min 8 chars, 1 Mayúscula, 1 Número)
+        if (strlen($pass) < 8 || !preg_match('/[A-Z]/', $pass) || !preg_match('/[0-9]/', $pass)) {
+            header("Location: adminPanel.php?status=error&msg=La+contraseña+debe+tener+al+menos+8+caracteres,+una+mayúscula+y+un+número");
+            exit();
+        }
+
         // Encriptar la contraseña de forma segura
         $pass_encriptada = password_hash($pass, PASSWORD_BCRYPT);
 

@@ -477,6 +477,25 @@ $res_temporadas = $stmt_t->get_result();
                 });
             }
         });
+
+        /**
+         * Validación de contraseña segura en el Perfil
+         */
+        function validarPasswordPerfil(event) {
+            const form = event.target;
+            const passwordInput = form.querySelector('input[name="new_password"]');
+            const password = passwordInput.value;
+
+            // Regex: Mínimo 8 caracteres, al menos una mayúscula y al menos un número
+            const passRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+            
+            if (!passRegex.test(password)) {
+                alert("Por seguridad, la nueva contraseña debe tener:\n- Mínimo 8 caracteres\n- Al menos una mayúscula\n- Al menos un número");
+                event.preventDefault(); // Detiene el envío del formulario
+                return false;
+            }
+            return true;
+        }
     </script>
 </head>
 <body>
@@ -558,9 +577,10 @@ $res_temporadas = $stmt_t->get_result();
                         <span class="arrow">></span>
                     </div>
                     <div class="change-password-content">
-                        <form action="actualizar_password.php" method="POST" class="change-password-form">
+                        <form action="actualizar_password.php" method="POST" class="change-password-form" onsubmit="return validarPasswordPerfil(event)">
                             <input type="password" name="current_password" placeholder="Contraseña Actual" required>
                             <input type="password" name="new_password" placeholder="Nueva Contraseña" required>
+                            <small style="color: #888; font-size: 0.8em; display:block; margin-bottom:10px;">Mínimo 8 caracteres, una mayúscula y un número.</small>
                             <input type="password" name="confirm_new_password" placeholder="Confirmar Nueva Contraseña" required>
                             <button type="submit" class="btn-update-password">Actualizar Contraseña</button>
                         </form>

@@ -554,6 +554,22 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                 });
             });
         });
+
+        /**
+         * Validación de contraseña segura desde el Admin Panel
+         */
+        function validarPasswordAdmin(event, form) {
+            const password = form.nueva_password.value;
+            // Regex: Min 8 chars, 1 Mayúscula, 1 Número
+            const passRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+            
+            if (!passRegex.test(password)) {
+                alert("Por seguridad, la contraseña debe tener:\n- Mínimo 8 caracteres\n- Al menos una mayúscula\n- Al menos un número");
+                event.preventDefault();
+                return false;
+            }
+            return true;
+        }
     </script>
 </head>
 
@@ -752,11 +768,14 @@ $total_compras = ($res_count_c) ? $res_count_c->fetch_assoc()['total'] : 0;
                                         </tr>
                                     </form>
                                 <?php elseif ($reset_id == $user['id']): ?>
-                                    <form method="POST" action="actualizar_password.php">
+                                    <form method="POST" action="actualizar_password.php" onsubmit="return validarPasswordAdmin(event, this)">
                                         <input type="hidden" name="id" value="<?= $user['id'] ?>">
                                         <tr>
                                             <td><?= $user['id'] ?></td>
-                                            <td colspan="5"><input type="password" name="nueva_password" placeholder="Nueva clave para <?= $user['nombre_completo'] ?>..." required></td>
+                                            <td colspan="5">
+                                                <input type="password" name="nueva_password" placeholder="Nueva clave para <?= $user['nombre_completo'] ?>..." required>
+                                                <small style="color: #ffc107; font-size: 0.8em; display:block; margin-top:2px;">Requisito: Min 8 caracteres, 1 Mayúscula, 1 Número</small>
+                                            </td>
                                             <td>
                                                 <button type="submit" class="action-btn" style="background:#28a745;"><i class="fa-solid fa-key"></i></button>
                                                 <a href="adminPanel.php" class="action-btn delete"><i class="fa-solid fa-xmark"></i></a>
